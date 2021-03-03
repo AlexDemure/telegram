@@ -1,6 +1,6 @@
 FROM python:3.8-slim
 
-RUN pip install requests aiogram gunicorn httpx pydantic motor pymongo
+RUN pip install requests aiogram gunicorn httpx pydantic motor pymongo APScheduler
 
 COPY . .
 

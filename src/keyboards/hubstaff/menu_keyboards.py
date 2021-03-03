@@ -3,9 +3,8 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 keyboards = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Список задач"),
-            KeyboardButton(text="Учетная запись"),
-        ]
+            KeyboardButton(text="Учетная запись HubStaff"),
+        ],
     ],
     resize_keyboard=True
 )

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -15,6 +15,8 @@ class TaskItem(BaseModel):
     tags: List[TagItem]
     priority: str
     url: str
+    time_estimate: Optional[int]
+    points: Optional[int]
     folder_name: str
     list_name: str
 
