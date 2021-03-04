@@ -1,22 +1,18 @@
 from typing import Optional
 
 from src.apps.clickup.enums import PriorityEnumsByEmoji, TagsEnumsByEmoji
-from src.apps.clickup.schemas import UserTasks
 from src.apps.clickup.service import ClickUp
-from src.apps.users.logic import get_user
+from src.schemas.clickup import ClickUpTasks
+from src.schemas.users import UserData
 
 
-async def get_user_tasks(user_id: int) -> Optional[UserTasks]:
+async def get_user_tasks(user_data: UserData) -> Optional[ClickUpTasks]:
     """
     Получение списка задач на пользователя.
 
     Возвращается список задач уже отсортированный по приоритету и по тегам.
     """
-    user_data = await get_user(user_id)
-    if not user_data:
-        return None
-
-    data = await ClickUp(user_data.clickup_token).collect_user_tasks()
+    data = await ClickUp(user_data.click_up.auth_token).collect_user_tasks(user_data.click_up.id)
 
     data.tasks.sort(
         key=lambda x: (
@@ -31,11 +27,11 @@ async def get_user_tasks(user_id: int) -> Optional[UserTasks]:
     return data
 
 
-async def get_user_tasks_with_unset_time(user_id: int) -> Optional[UserTasks]:
+async def get_user_tasks_with_unset_time(user_data: UserData) -> Optional[ClickUpTasks]:
     """
     Получение списка задач у которых не проставлено время выполнения на пользователя
     """
-    data = await get_user_tasks(user_id)
+    data = await get_user_tasks(user_data)
     if not data:
         return None
 

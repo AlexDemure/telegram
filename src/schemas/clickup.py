@@ -2,17 +2,17 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
-class TagItem(BaseModel):
+class ClickUpTagItem(BaseModel):
     name: str
 
 
-class TaskItem(BaseModel):
+class ClickUpTaskItem(BaseModel):
     id: str
     name: str
     status: str
     assigned_name: str
     assigned_id: int
-    tags: List[TagItem]
+    tags: List[ClickUpTagItem]
     priority: str
     url: str
     time_estimate: Optional[int]
@@ -21,15 +21,15 @@ class TaskItem(BaseModel):
     list_name: str
 
 
-class UserData(BaseModel):
+class ClickUpUserData(BaseModel):
     id: int
     username: str
     email: str
+    auth_token: str
 
 
-class UserTasks(BaseModel):
-    tasks: List[TaskItem]
-    user: UserData
+class ClickUpTasks(BaseModel):
+    tasks: List[ClickUpTaskItem]
 
 
 class TeamData(BaseModel):

@@ -1,10 +1,10 @@
-from src.apps.users.schemas import UserData
+from src.schemas.users import UserData
 
 
 def prepare_user_data(data: dict) -> UserData:
     return UserData(
         user_id=data['user_id'],
-        email=data['email'],
-        clickup_token=data['clickup_token'],
-        hubstaff_token=data['hubstaff_token'],
+        registration_at=data['registration_at'],
+        click_up=data['click_up'],
+        hub_staff=data['hub_staff'],
     )

@@ -16,5 +16,5 @@ logging.basicConfig(level=logging.DEBUG)
 dp.middleware.setup(LoggingMiddleware())
 
 from .clickup import menu, tasks, users
-from .hubstaff import menu, users
+from .hubstaff import menu, users, activities
 from . import start
