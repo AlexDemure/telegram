@@ -1,6 +1,6 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from src.commands.clickup.tasks import daily_send_list_tasks, daily_send_list_tasks_with_unset_time
+from src.bot.commands.clickup.tasks import daily_send_list_tasks, daily_send_list_tasks_with_unset_time
 
 
 def start():

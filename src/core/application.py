@@ -1,8 +1,8 @@
 from aiogram import executor
 
-from src.db.database import users_db
-from src.commands.dispatcher import dp
+from src.bot.commands.dispatcher import dp
 from src.core import scheduler
+from src.db.database import users_db
 
 users_db.init_connection()
 

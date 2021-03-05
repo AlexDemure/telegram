@@ -1,4 +1,4 @@
-from src.schemas.users import UserData
+from src.apps.users.schemas import UserData
 
 
 def prepare_user_data(data: dict) -> UserData:

@@ -5,10 +5,10 @@ from pydantic import validate_arguments
 
 from src.apps.users.crud import _add_user, _get_user, _get_users
 from src.apps.users.crud import update_document
+from src.apps.users.schemas import UserData, UserCreate
 from src.apps.users.serializer import prepare_user_data
-from src.schemas.clickup import ClickUpUserData
-from src.schemas.hubstaff import HubStaffUserData
-from src.schemas.users import UserData, UserCreate
+from src.submodules.clickup.schemas import ClickUpUserData
+from src.submodules.hubstaff.schemas import HubStaffUserData
 
 
 @validate_arguments
