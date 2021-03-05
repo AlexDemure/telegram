@@ -19,5 +19,5 @@ async def start_menu(message: types.Message):
         await message.reply(f"{response}", parse_mode=ParseMode.HTML, reply_markup=start_keyboards.keyboards)
 
     else:
-        response = f"<b>Меню HubStaff</b>"
+        response = f"Меню HubStaff"
         await message.reply(f"{response}", parse_mode=ParseMode.HTML, reply_markup=menu_keyboards.keyboards)

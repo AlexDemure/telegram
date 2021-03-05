@@ -5,7 +5,7 @@ from src.submodules.clickup.enums import PriorityEnumsByEmoji
 
 def prepare_response_list_tasks(data: ClickUpTasks) -> str:
     """Подготовка данных для ответа в телеграмм."""
-    response = f"<b>Список задач:</b>\n"
+    response = f"Список задач:\n"
     for task in data.tasks:
         tags_to_str = tags_list_to_emoji_str(task.tags)
         priority_to_emoji = PriorityEnumsByEmoji(task.priority).emoji
@@ -16,7 +16,7 @@ def prepare_response_list_tasks(data: ClickUpTasks) -> str:
 
 def prepare_response_list_tasks_with_unset_time(data: ClickUpTasks) -> str:
     """Подготовка данных для ответа в телеграмм."""
-    response = f"<b>Не проставлено планируемое время в задачах:</b>\n"
+    response = f"Не проставлено планируемое время в задачах:\n"
     for task in data.tasks:
         response += f"<a href='{task.url}'>{task.id}</a> {task.name}\n"
 

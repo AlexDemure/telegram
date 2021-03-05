@@ -47,19 +47,3 @@ async def get_my_tasks_with_unset_time(message: types.Message):
     await message.answer(f"{response}", parse_mode=ParseMode.HTML, reply_markup=menu_keyboards.keyboards)
 
 
-async def daily_send_list_tasks():
-    """Ежедневная отправка задач по пользователям."""
-    users = await get_users()
-    for user in users:
-        user_tasks = await get_user_tasks(user)
-        response = prepare_response_list_tasks(user_tasks)
-        await bot.send_message(user.user_id, response, parse_mode=ParseMode.HTML)
-
-
-async def daily_send_list_tasks_with_unset_time():
-    """Ежедневная отправка задач у которых не проставлено время выполнения."""
-    users = await get_users()
-    for user in users:
-        user_tasks = await get_user_tasks_with_unset_time(user)
-        response = prepare_response_list_tasks_with_unset_time(user_tasks)
-        await bot.send_message(user.user_id, response, parse_mode=ParseMode.HTML)
