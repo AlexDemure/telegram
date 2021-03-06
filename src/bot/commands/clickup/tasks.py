@@ -3,8 +3,8 @@ from aiogram.dispatcher.filters import Text
 from aiogram.types import ParseMode
 
 from src.apps.clickup.logic import get_user_tasks, get_user_tasks_with_unset_time
-from src.apps.users.logic import get_user, get_users
-from src.bot.commands.dispatcher import dp, bot
+from src.apps.users.logic import get_user
+from src.bot.commands.dispatcher import dp
 from src.bot.keyboards import start_keyboards
 from src.bot.keyboards.clickup import menu_keyboards
 from src.bot.keyboards.clickup.menu_keyboards import MenuKeyboards

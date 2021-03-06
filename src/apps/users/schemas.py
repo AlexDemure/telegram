@@ -19,4 +19,3 @@ class UserCreate(UserDataBase):
 
 class UserData(UserDataBase):
     registration_at: datetime
-

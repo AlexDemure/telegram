@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from typing import Optional, List
 
 from pydantic import validate_arguments
@@ -44,6 +45,10 @@ async def get_users() -> List[UserData]:
 async def bind_click_up(user_id: int, click_up_data: ClickUpUserData):
     """Добавление к текущему пользователю данные от ClickUp."""
     user_data = await _get_user(user_id)
+    if not user_data:
+        await add_new_user(UserCreate(user_id=user_id, registration_at=datetime.utcnow()))
+        user_data = await _get_user(user_id)
+
     user_data['click_up'] = click_up_data.dict()
 
     document_id = user_data.pop("_id")
@@ -55,6 +60,10 @@ async def bind_click_up(user_id: int, click_up_data: ClickUpUserData):
 async def bind_hub_staff(user_id: int, hub_staff_data: HubStaffUserData):
     """Добавление к текущему пользователю данные от HubStaff."""
     user_data = await _get_user(user_id)
+    if not user_data:
+        await add_new_user(UserCreate(user_id=user_id, registration_at=datetime.utcnow()))
+        user_data = await _get_user(user_id)
+
     user_data['hub_staff'] = hub_staff_data.dict()
 
     document_id = user_data.pop("_id")

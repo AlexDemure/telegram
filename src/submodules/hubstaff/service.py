@@ -108,23 +108,25 @@ class HubStaffOAuth(BaseClass):
     """Класс с полным процессом получения авторизационного токена для работы с HubStaff."""
 
     @staticmethod
-    def get_verify_code_url() -> str:
+    def get_verify_code_url(redirect_uri: str, state: str) -> str:
         """Шаг №1 Получение ссылки с кодом подтверждения."""
         return f"https://account.hubstaff.com/authorizations/new" \
                f"?client_id={hub_staff_settings.HUBSTAFF_CLIENT_ID}" \
                f"&response_type=code" \
                f"&nonce={str(uuid4())}" \
-               f"&redirect_uri=https://google.com" \
-               f"&scope=openid hubstaff:read profile tasks:read"
+               f"&state={state}" \
+               f"&scope=openid hubstaff:read profile tasks:read" \
+               f"&redirect_uri={redirect_uri}" \
 
-    async def get_auth_token(self, verify_code: str) -> dict:
+
+    async def get_auth_token(self, verify_code: str, redirect_uri: str) -> dict:
         """Шаг №2 Получение токена авторизации с применением кода подтверждения."""
         url = "https://account.hubstaff.com/access_tokens" \
               "?grant_type=authorization_code" \
               f"&code={verify_code}" \
-              "&redirect_uri=https://google.com"
+              f"&redirect_uri={redirect_uri}"
 
-        headers = {"Authorization": f"Basic {self.encode_data_to_base64()}"}
+        headers = {"Authorization": f"Basic {self.get_basic_token_to_base64()}"}
 
         response = await self.client.post(url=url, headers=headers)
         assert response.status_code == 200
@@ -132,7 +134,7 @@ class HubStaffOAuth(BaseClass):
         return response.json()
 
     @staticmethod
-    def encode_data_to_base64() -> str:
+    def get_basic_token_to_base64() -> str:
         """Шифрование Basic токена."""
         client_data_to_bytes = f'{hub_staff_settings.HUBSTAFF_CLIENT_ID}:{hub_staff_settings.HUBSTAFF_SECRET_KEY}'.encode()
         return base64.b64encode(client_data_to_bytes).decode()

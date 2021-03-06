@@ -5,12 +5,12 @@ from src.apps.users.schemas import UserData
 from src.core.sessions import HTTP_CLIENT
 from src.submodules.hubstaff.schemas import HubStaffUserData
 from src.submodules.hubstaff.service import HubStaff, HubStaffOAuth
+from src.core.config import settings
 
 
 async def add_hub_staff_data_by_user(user_id: int, verify_code: str) -> None:
     """Добавление данных из HubStaff пользователю."""
-
-    token_data = await HubStaffOAuth(HTTP_CLIENT).get_auth_token(verify_code)
+    token_data = await HubStaffOAuth(HTTP_CLIENT).get_auth_token(verify_code, f"{settings.webhook_uri}/connect")
     hub_staff_user_data = await HubStaff(HTTP_CLIENT, f"Bearer {token_data['access_token']}").get_user()
 
     hub_staff_data = HubStaffUserData(

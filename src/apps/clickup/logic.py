@@ -1,4 +1,5 @@
 from typing import Optional
+from pydantic import validate_arguments
 
 from src.apps.users.logic import bind_click_up
 from src.core.sessions import HTTP_CLIENT
@@ -8,6 +9,7 @@ from src.submodules.clickup.schemas import ClickUpTasks, ClickUpUserData
 from src.submodules.clickup.service import ClickUp, ClickUpOAuth
 
 
+@validate_arguments
 async def add_click_up_data_by_user(user_id: int, verify_code: str) -> None:
     """Добавление данных из ClickUp пользователю."""
 

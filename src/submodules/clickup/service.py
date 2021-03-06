@@ -62,11 +62,12 @@ class ClickUpOAuth(BaseClass):
     """Класс с полным процессом получения авторизационного токена для работы с ClickUp."""
 
     @staticmethod
-    def get_verify_code_url() -> str:
+    def get_verify_code_url(redirect_uri: str, state: str) -> str:
         """Шаг №1 Получение ссылки с кодом подтверждения."""
         return f"https://app.clickup.com/api" \
                f"?client_id={click_up_settings.CLICKUP_CLIENT_ID}" \
-               f"&redirect_uri=https://google.com"
+               f"&state={state}" \
+               f"&redirect_uri={redirect_uri}"
 
     async def get_auth_token(self, verify_code: str) -> str:
         """Шаг №2 Получение токена авторизации с применением кода подтверждения."""
