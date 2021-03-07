@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.apps.users.logic import bind_hub_staff
+from src.apps.users.logic import bind_data
 from src.apps.users.schemas import UserData
 from src.core.sessions import HTTP_CLIENT
 from src.submodules.hubstaff.schemas import HubStaffUserData
@@ -10,7 +10,7 @@ from src.core.config import settings
 
 async def add_hub_staff_data_by_user(user_id: int, verify_code: str) -> None:
     """Добавление данных из HubStaff пользователю."""
-    token_data = await HubStaffOAuth(HTTP_CLIENT).get_auth_token(verify_code, f"{settings.webhook_uri}/connect")
+    token_data = await HubStaffOAuth(HTTP_CLIENT).get_auth_token(verify_code, f"{settings.webhook_uri}/login")
     hub_staff_user_data = await HubStaff(HTTP_CLIENT, f"Bearer {token_data['access_token']}").get_user()
 
     hub_staff_data = HubStaffUserData(
@@ -20,7 +20,7 @@ async def add_hub_staff_data_by_user(user_id: int, verify_code: str) -> None:
         auth_token=f"Bearer {token_data['access_token']}",
         refresh_token=token_data['refresh_token']
     )
-    await bind_hub_staff(user_id, hub_staff_data)
+    await bind_data(user_id, hub_staff_data)
 
 
 async def get_activities_by_period(user_data: UserData, start_date: datetime, end_date: datetime):

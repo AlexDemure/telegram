@@ -2,20 +2,20 @@ from enum import Enum
 
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-from src.bot.keyboards.common_keyboards import CommonKeyboards
+from src.bot.keyboards.common import CommonKeysEnum
 
 
-class MenuKeyboards(Enum):
+class MenuHubStaffKeysEnum(Enum):
     work_log = "Журнал работ"
 
 
 keyboards = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text=MenuKeyboards.work_log.value),
+            KeyboardButton(text=MenuHubStaffKeysEnum.work_log.value),
         ],
         [
-            KeyboardButton(text=CommonKeyboards.main.value),
+            KeyboardButton(text=CommonKeysEnum.main.value),
         ]
     ],
     resize_keyboard=True

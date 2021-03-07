@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import validate_arguments
 
-from src.apps.users.logic import bind_click_up
+from src.apps.users.logic import bind_data
 from src.core.sessions import HTTP_CLIENT
 from src.apps.users.schemas import UserData
 from src.submodules.clickup.enums import PriorityEnumsByEmoji, TagsEnumsByEmoji
@@ -23,7 +23,7 @@ async def add_click_up_data_by_user(user_id: int, verify_code: str) -> None:
         auth_token=auth_token
 
     )
-    await bind_click_up(user_id, click_up_data)
+    await bind_data(user_id, click_up_data)
 
 
 async def get_user_tasks(user_data: UserData) -> Optional[ClickUpTasks]:

@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from pydantic import validate_arguments
 
@@ -42,31 +42,21 @@ async def get_users() -> List[UserData]:
     return [prepare_user_data(x) for x in users]
 
 
-async def bind_click_up(user_id: int, click_up_data: ClickUpUserData):
-    """Добавление к текущему пользователю данные от ClickUp."""
+async def bind_data(user_id: int, data: Union[ClickUpUserData, HubStaffUserData]):
+    """Обновление сервисных данных пользователю."""
     user_data = await _get_user(user_id)
     if not user_data:
         await add_new_user(UserCreate(user_id=user_id, registration_at=datetime.utcnow()))
         user_data = await _get_user(user_id)
 
-    user_data['click_up'] = click_up_data.dict()
+    if isinstance(data, ClickUpUserData):
+        user_data['click_up'] = data.dict()
+    elif isinstance(data, HubStaffUserData):
+        user_data['hub_staff'] = data.dict()
+    else:
+        return
 
     document_id = user_data.pop("_id")
 
     await update_document(document_id, user_data)
-    logging.debug("Token is bind to user.")
-
-
-async def bind_hub_staff(user_id: int, hub_staff_data: HubStaffUserData):
-    """Добавление к текущему пользователю данные от HubStaff."""
-    user_data = await _get_user(user_id)
-    if not user_data:
-        await add_new_user(UserCreate(user_id=user_id, registration_at=datetime.utcnow()))
-        user_data = await _get_user(user_id)
-
-    user_data['hub_staff'] = hub_staff_data.dict()
-
-    document_id = user_data.pop("_id")
-
-    await update_document(document_id, user_data)
-    logging.debug("Token is bind to user.")
+    logging.debug("Data is bind to user.")

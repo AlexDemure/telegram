@@ -1,10 +1,9 @@
-from aiogram.dispatcher.webhook import WebhookRequestHandler
 from aiohttp import web
 
-from src.apps.users.routes import connect_to_system
 from src.bot.commands.dispatcher import dp, bot
 from src.core import scheduler
 from src.core.config import settings
+from src.core.urls import routes
 from src.db.database import users_db
 
 
@@ -24,11 +23,7 @@ async def on_shutdown(app):
 def application():
 
     app = web.Application()
-    app.add_routes([
-        web.route('get', f'{settings.WEBHOOK_PATH}/connect', connect_to_system),
-
-        web.route('*', settings.WEBHOOK_PATH, WebhookRequestHandler),
-    ])
+    app.add_routes(routes)
 
     app['BOT_DISPATCHER'] = dp
 

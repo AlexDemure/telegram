@@ -2,19 +2,16 @@ from enum import Enum
 
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-
-class StartKeyboards(Enum):
-    click_up = "ClickUp"
-    hub_staff = "HubStaff"
+from src.core.enums import ServicesEnum
 
 
 keyboards = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text=StartKeyboards.click_up.value),
+            KeyboardButton(text=ServicesEnum.click_up.value),
         ],
         [
-            KeyboardButton(text=StartKeyboards.hub_staff.value),
+            KeyboardButton(text=ServicesEnum.hub_staff.value),
         ]
     ],
     resize_keyboard=True

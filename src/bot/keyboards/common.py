@@ -1,5 +1,5 @@
 from enum import Enum
 
 
-class CommonKeyboards(Enum):
+class CommonKeysEnum(Enum):
     main = "Главное меню"
