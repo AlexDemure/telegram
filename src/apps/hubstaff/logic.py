@@ -2,15 +2,15 @@ from datetime import datetime
 
 from src.apps.users.logic import bind_data
 from src.apps.users.schemas import UserData
-from src.utils import get_webhook_url
+from src.core.enums import WebhookUrlsEnum
 from src.submodules.hubstaff.serializer import prepare_user_data
 from src.submodules.hubstaff.service import HubStaff, HubStaffOAuth
-from src.submodules.oauth.settings import OAUTH_ENDPOINT
+from src.utils import get_webhook_url
 
 
 async def add_hub_staff_data_by_user(user_id: int, code: str) -> None:
     """Добавление данных из HubStaff пользователю."""
-    redirect_uri = get_webhook_url(OAUTH_ENDPOINT, short_url=False)
+    redirect_uri = get_webhook_url(WebhookUrlsEnum.oauth.value, short_url=False)
     token_data = await HubStaffOAuth().get_auth_token(code, redirect_uri, is_basic_token=True)
 
     access_token = f"Bearer {token_data['access_token']}"

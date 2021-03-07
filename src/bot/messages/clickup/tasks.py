@@ -1,6 +1,6 @@
+from src.submodules.clickup.enums import PriorityEnumsByEmoji
 from src.submodules.clickup.schemas import ClickUpTasks
 from src.submodules.clickup.serializer import tags_list_to_emoji_str
-from src.submodules.clickup.enums import PriorityEnumsByEmoji
 
 
 def prepare_response_list_tasks(data: ClickUpTasks) -> str:

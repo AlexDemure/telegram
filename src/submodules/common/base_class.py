@@ -1,6 +1,7 @@
-from tenacity import retry, wait_exponential, stop_after_attempt
-import httpx
 import json
+
+import httpx
+from tenacity import retry, wait_exponential, stop_after_attempt
 
 
 class APIClass:

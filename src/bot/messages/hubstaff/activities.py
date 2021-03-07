@@ -1,8 +1,8 @@
 from datetime import timedelta
 
+from src.core.config import settings
 from src.submodules.hubstaff.schemas import HubStaffActivityReports
 from src.utils import convert_number_to_decimal
-from src.core.config import settings
 
 
 def prepare_response_activities_list(data: HubStaffActivityReports):

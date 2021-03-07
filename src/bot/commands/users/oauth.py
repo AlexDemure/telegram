@@ -6,10 +6,9 @@ from src.bot.commands.dispatcher import dp, bot
 from src.bot.keyboards.clickup.start import StartClickUpMenuKeysEnum
 from src.bot.keyboards.hubstaff.start import StartHubStaffMenuKeysEnum
 from src.bot.messages.users.oauth import prepare_response_get_verify_code
-from src.core.enums import ServicesEnum
+from src.core.enums import ServicesEnum, WebhookUrlsEnum
 from src.submodules.clickup.service import ClickUpOAuth
 from src.submodules.hubstaff.service import HubStaffOAuth
-from src.submodules.oauth.settings import OAUTH_ENDPOINT
 from src.utils import get_webhook_url
 
 
@@ -24,7 +23,7 @@ from src.utils import get_webhook_url
 )
 async def get_auth_code(message: types.Message):
     """Получение кода для возможности получить токен авторизации."""
-    redirect_uri = f"{get_webhook_url(OAUTH_ENDPOINT, short_url=False)}"
+    redirect_uri = f"{get_webhook_url(WebhookUrlsEnum.oauth.value, short_url=False)}"
 
     if message.text == StartClickUpMenuKeysEnum.connect_to_click_up.value:
         url = ClickUpOAuth.get_verify_code_url(

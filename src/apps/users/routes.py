@@ -11,6 +11,7 @@ from src.submodules.oauth.webhooks import login_success
 
 
 async def login_success_to_system(request):
+    """Уведомление об успешной авторизации в сервисе."""
     try:
         code, state = login_success(request)
     except ValueError as e:

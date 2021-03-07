@@ -1,1 +1,0 @@
-OAUTH_ENDPOINT = "login"
