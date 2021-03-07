@@ -10,14 +10,18 @@ from src.db.database import users_db
 async def on_startup(app):
     webhook = await bot.get_webhook_info()
     print(webhook)
+
     users_db.init_connection()
     scheduler.start()
 
+    await bot.delete_webhook()
     await bot.set_webhook(f"{settings.webhook_uri}")
 
 
 async def on_shutdown(app):
-    await bot.delete_webhook()
+    dispatcher = app['BOT_DISPATCHER']
+    await dispatcher.storage.close()
+    await dispatcher.storage.wait_closed()
 
 
 def application():
@@ -28,6 +32,7 @@ def application():
     app['BOT_DISPATCHER'] = dp
 
     app.on_startup.append(on_startup)
+    app.on_shutdown.append(on_shutdown)
 
     return app
 

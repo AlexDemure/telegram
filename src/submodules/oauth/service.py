@@ -14,7 +14,7 @@ class OAuth(APIClass):
         raise NotImplementedError
 
     @staticmethod
-    def get_auth_token_url(code: str, redirect_uri: str = None):
+    def get_token_url(code: str, redirect_uri: str = None):
         """
         Шаг №2.1 Получение ссылки с применением code для получения авторизационного токена.
 
@@ -22,7 +22,7 @@ class OAuth(APIClass):
         """
         raise NotImplementedError
 
-    async def get_auth_token(self, code: str, redirect_uri: str = None, is_basic_token: bool = False) -> dict:
+    async def get_token(self, code: str, redirect_uri: str = None, is_basic_token: bool = False) -> dict:
         """
         Шаг №2.2 Отправка запроса на получение авторизационного токена
         """
@@ -30,7 +30,7 @@ class OAuth(APIClass):
             access_basic_token = f"Basic {OAuthUtils.get_basic_token_to_base64(self.client_id, self.client_secret)}"
             self._headers['Authorization'] = access_basic_token
 
-        url = self.get_auth_token_url(code, redirect_uri)
+        url = self.get_token_url(code, redirect_uri)
         return await self.make_request("POST", url)
 
 

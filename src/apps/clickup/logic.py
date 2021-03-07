@@ -13,7 +13,7 @@ from src.submodules.clickup.service import ClickUp, ClickUpOAuth
 @validate_arguments
 async def add_click_up_data_by_user(user_id: int, code: str) -> None:
     """Добавление данных из ClickUp пользователю."""
-    token_data = await ClickUpOAuth().get_auth_token(code)
+    token_data = await ClickUpOAuth().get_token(code)
 
     click_up_user_data = await ClickUp(token_data['access_token']).get_user()
 

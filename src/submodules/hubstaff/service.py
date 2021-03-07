@@ -111,7 +111,7 @@ class HubStaffOAuth(OAuth):
     client_secret = hub_staff_settings.HUBSTAFF_SECRET_KEY
 
     @staticmethod
-    def get_verify_code_url(redirect_uri: str, state: dict) -> str:
+    def get_code_url(redirect_uri: str, state: dict) -> str:
         return f"https://account.hubstaff.com/authorizations/new" \
                f"?client_id={hub_staff_settings.HUBSTAFF_CLIENT_ID}" \
                f"&response_type=code" \
@@ -122,8 +122,23 @@ class HubStaffOAuth(OAuth):
 
 
     @staticmethod
-    def get_auth_token_url(code: str, redirect_uri: str = None):
+    def get_token_url(code: str, redirect_uri: str = None) -> str:
         return "https://account.hubstaff.com/access_tokens" \
                "?grant_type=authorization_code" \
                f"&code={code}" \
                f"&redirect_uri={redirect_uri}"
+
+    @staticmethod
+    def get_refresh_token_url(refresh_token: str) -> str:
+        return "https://account.hubstaff.com/access_tokens" \
+               "?grant_type=refresh_token" \
+               f"&scope=openid hubstaff:read profile tasks:read" \
+               f"&refresh_token={refresh_token}"
+
+    async def get_refresh_token(self, refresh_token: str) -> dict:
+        """Получение токена через Refresh Token."""
+        access_basic_token = f"Basic {OAuthUtils.get_basic_token_to_base64(self.client_id, self.client_secret)}"
+        self._headers['Authorization'] = access_basic_token
+
+        url = self.get_refresh_token_url(refresh_token)
+        return await self.make_request("POST", url)

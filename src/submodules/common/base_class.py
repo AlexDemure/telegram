@@ -1,7 +1,7 @@
 import json
 
 import httpx
-from tenacity import retry, wait_exponential, stop_after_attempt
+from tenacity import retry, wait_fixed, stop_after_attempt
 
 
 class APIClass:
@@ -26,9 +26,9 @@ class APIClass:
         return self._session
 
     @retry(
-        wait=wait_exponential(multiplier=1, min=1, max=2),
+        wait=wait_fixed(1),
         stop=stop_after_attempt(3),
-        reraise=True,
+        reraise=True
     )
     async def make_request(self, method: str, url: str, payload: dict = None):
         request = httpx.Request(method, url, headers=self._headers, json=payload)

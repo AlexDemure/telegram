@@ -66,7 +66,7 @@ class ClickUpOAuth(OAuth):
     client_secret = click_up_settings.CLICKUP_SECRET_KEY
 
     @staticmethod
-    def get_verify_code_url(redirect_uri: str, state: dict) -> str:
+    def get_code_url(redirect_uri: str, state: dict) -> str:
         """Шаг №1 Получение ссылки с кодом подтверждения."""
         return f"https://app.clickup.com/api" \
                f"?client_id={click_up_settings.CLICKUP_CLIENT_ID}" \
@@ -74,7 +74,7 @@ class ClickUpOAuth(OAuth):
                f"&redirect_uri={redirect_uri}"
 
     @classmethod
-    def get_auth_token_url(cls, code: str, redirect_uri: str = None):
+    def get_token_url(cls, code: str, redirect_uri: str = None):
         return f'https://api.clickup.com/api/v2/oauth/token?' \
               f'client_id={click_up_settings.CLICKUP_CLIENT_ID}&' \
               f'client_secret={click_up_settings.CLICKUP_SECRET_KEY}&' \

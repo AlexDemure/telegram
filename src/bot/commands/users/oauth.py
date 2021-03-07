@@ -26,12 +26,12 @@ async def get_auth_code(message: types.Message):
     redirect_uri = f"{get_webhook_url(WebhookUrlsEnum.oauth.value, short_url=False)}"
 
     if message.text == StartClickUpMenuKeysEnum.connect_to_click_up.value:
-        url = ClickUpOAuth.get_verify_code_url(
+        url = ClickUpOAuth.get_code_url(
             redirect_uri=redirect_uri,
             state=dict(system=ServicesEnum.click_up.value, user_id=message.chat.id)
         )
     elif message.text == StartHubStaffMenuKeysEnum.connect_to_hub_staff.value:
-        url = HubStaffOAuth.get_verify_code_url(
+        url = HubStaffOAuth.get_code_url(
             redirect_uri=redirect_uri,
             state=dict(system=ServicesEnum.hub_staff.value, user_id=message.chat.id)
         )
