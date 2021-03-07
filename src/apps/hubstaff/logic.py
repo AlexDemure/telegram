@@ -2,31 +2,23 @@ from datetime import datetime
 
 from src.apps.users.logic import bind_data
 from src.apps.users.schemas import UserData
-from src.core.sessions import HTTP_CLIENT
-from src.submodules.hubstaff.schemas import HubStaffUserData
+from src.utils import get_webhook_url
+from src.submodules.hubstaff.serializer import prepare_user_data
 from src.submodules.hubstaff.service import HubStaff, HubStaffOAuth
-from src.core.config import settings
+from src.submodules.oauth.settings import OAUTH_ENDPOINT
 
 
-async def add_hub_staff_data_by_user(user_id: int, verify_code: str) -> None:
+async def add_hub_staff_data_by_user(user_id: int, code: str) -> None:
     """Добавление данных из HubStaff пользователю."""
-    token_data = await HubStaffOAuth(HTTP_CLIENT).get_auth_token(verify_code, f"{settings.webhook_uri}/login")
-    hub_staff_user_data = await HubStaff(HTTP_CLIENT, f"Bearer {token_data['access_token']}").get_user()
+    redirect_uri = get_webhook_url(OAUTH_ENDPOINT, short_url=False)
+    token_data = await HubStaffOAuth().get_auth_token(code, redirect_uri, is_basic_token=True)
 
-    hub_staff_data = HubStaffUserData(
-        id=hub_staff_user_data['id'],
-        username=hub_staff_user_data['name'],
-        email=hub_staff_user_data['email'],
-        auth_token=f"Bearer {token_data['access_token']}",
-        refresh_token=token_data['refresh_token']
-    )
-    await bind_data(user_id, hub_staff_data)
+    access_token = f"Bearer {token_data['access_token']}"
+    hub_staff_user_data = await HubStaff(access_token).get_user()
+
+    await bind_data(user_id, prepare_user_data(hub_staff_user_data, token_data))
 
 
 async def get_activities_by_period(user_data: UserData, start_date: datetime, end_date: datetime):
     """Получение списка активностей за период вермени."""
-    reports = await HubStaff(
-        HTTP_CLIENT, user_data.hub_staff.auth_token
-    ).collect_user_activities_by_period(start_date, end_date)
-
-    return reports
+    return await HubStaff(user_data.hub_staff.auth_token).collect_user_activities_by_period(start_date, end_date)

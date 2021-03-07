@@ -1,7 +1,7 @@
 from typing import List
 
 from .enums import TagsEnumsByEmoji
-from .schemas import ClickUpTaskItem, ClickUpTagItem
+from .schemas import ClickUpTaskItem, ClickUpTagItem, ClickUpUserData
 
 
 def prepare_tags(tags: list) -> List[ClickUpTagItem]:
@@ -41,5 +41,14 @@ def prepare_task(task: dict) -> ClickUpTaskItem:
         folder_name=task['folder']['name'],
         list_name=task['list']['name'],
 
+    )
+
+
+def prepare_user_data(user_data: dict, token_data: dict) -> ClickUpUserData:
+    return ClickUpUserData(
+        id=user_data['id'],
+        username=user_data['username'],
+        email=user_data['email'],
+        auth_token=token_data['access_token'],  # Type Bearer ставить не надо.
     )
 

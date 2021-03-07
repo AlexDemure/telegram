@@ -7,26 +7,24 @@ from src.bot.commands.dispatcher import bot
 from src.bot.keyboards.clickup import menu as clickup_keyboards
 from src.bot.keyboards.hubstaff import menu as hubstaff_keyboards
 from src.core.enums import ServicesEnum
-from src.utils import decode_data_from_base64
+from src.submodules.oauth.webhooks import login_success
 
 
-async def login_to_system(request):
+async def login_success_to_system(request):
     try:
-        state = decode_data_from_base64(request.query.get("state"))
-    except Exception:
-        return web.json_response(status=400, data=dict(msg="Incorrect code. Try logging in again"))
-
-    verify_code = request.query.get("code")
+        code, state = login_success(request)
+    except ValueError as e:
+        return web.json_response(status=400, data=dict(msg=str(e)))
 
     if state['system'] == ServicesEnum.hub_staff.value:
-        await add_hub_staff_data_by_user(state['user_id'], verify_code)
+        await add_hub_staff_data_by_user(state['user_id'], code)
         keyboards = hubstaff_keyboards.keyboards
 
     elif state['system'] == ServicesEnum.click_up.value:
-        await add_click_up_data_by_user(state['user_id'], verify_code)
+        await add_click_up_data_by_user(state['user_id'], code)
         keyboards = clickup_keyboards.keyboards
     else:
-        return web.json_response(status=400, data=dict(msg="Incorrect code. Try logging in again"))
+        raise ValueError
 
     await bot.send_message(
         state['user_id'],

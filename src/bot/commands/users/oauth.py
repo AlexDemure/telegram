@@ -7,10 +7,10 @@ from src.bot.keyboards.clickup.start import StartClickUpMenuKeysEnum
 from src.bot.keyboards.hubstaff.start import StartHubStaffMenuKeysEnum
 from src.bot.messages.users.oauth import prepare_response_get_verify_code
 from src.core.enums import ServicesEnum
-from src.core.urls import get_webhook_url, OAUTH_ENDPOINT
 from src.submodules.clickup.service import ClickUpOAuth
 from src.submodules.hubstaff.service import HubStaffOAuth
-from src.utils import encode_data_to_base64
+from src.submodules.oauth.settings import OAUTH_ENDPOINT
+from src.utils import get_webhook_url
 
 
 @dp.message_handler(
@@ -29,12 +29,12 @@ async def get_auth_code(message: types.Message):
     if message.text == StartClickUpMenuKeysEnum.connect_to_click_up.value:
         url = ClickUpOAuth.get_verify_code_url(
             redirect_uri=redirect_uri,
-            state=encode_data_to_base64(dict(system=ServicesEnum.click_up.value, user_id=message.chat.id))
+            state=dict(system=ServicesEnum.click_up.value, user_id=message.chat.id)
         )
     elif message.text == StartHubStaffMenuKeysEnum.connect_to_hub_staff.value:
         url = HubStaffOAuth.get_verify_code_url(
             redirect_uri=redirect_uri,
-            state=encode_data_to_base64(dict(system=ServicesEnum.hub_staff.value, user_id=message.chat.id))
+            state=dict(system=ServicesEnum.hub_staff.value, user_id=message.chat.id)
         )
     else:
         raise ValueError

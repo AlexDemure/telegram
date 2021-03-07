@@ -5,6 +5,8 @@ from typing import Union
 
 from pydantic import validate_arguments
 
+from src.core.config import settings
+
 
 @validate_arguments
 def convert_number_to_decimal(num: Union[int, float, Decimal]) -> Decimal:
@@ -22,3 +24,10 @@ def encode_data_to_base64(data: dict) -> str:
 
 def decode_data_from_base64(base64_string: str) -> dict:
     return json.loads(base64.b64decode(base64_string).decode())
+
+
+def get_webhook_url(endpoint: str, short_url=True) -> str:
+    if short_url:
+        return f"{settings.WEBHOOK_PATH}/{endpoint}"
+    else:
+        return f"{settings.webhook_uri}/{endpoint}"

@@ -1,40 +1,46 @@
 from tenacity import retry, wait_exponential, stop_after_attempt
+import httpx
+import json
 
 
-class BaseClass:
+class APIClass:
 
-    client = None
+    _session: httpx.AsyncClient = None
 
-    def __init__(self, http_client):
-        self.client = http_client
+    _headers = None
 
+    def __init__(self, access_token: str = None):
+        self._headers: dict = {
+            "Accept": "application/json",
+            'Content-Type': 'application/json',
+        }
+        if access_token is not None:
+            self._headers['Authorization'] = access_token
 
-class APIClass(BaseClass):
+    @property
+    def _client_session(self) -> httpx.AsyncClient:
+        if not self._session or self._session.is_closed:
+            self._session = httpx.AsyncClient(headers=self._headers)
 
-    headers: dict = None
-
-    def __init__(self, http_client, auth_token: str):
-        super().__init__(http_client)
-        self.headers = {"Authorization": auth_token}
-
-    @retry(
-        wait=wait_exponential(multiplier=1, min=1, max=2),
-        stop=stop_after_attempt(3),
-        reraise=True,
-    )
-    async def _rs_get(self, url) -> dict:
-        response = await self.client.get(url=url, headers=self.headers)
-        assert response.status_code == 200
-
-        return response.json()
+        return self._session
 
     @retry(
         wait=wait_exponential(multiplier=1, min=1, max=2),
         stop=stop_after_attempt(3),
         reraise=True,
     )
-    async def _rs_post(self, url, data: dict = None) -> dict:
-        response = await self.client.post(url=url, headers=self.headers, json=data)
-        assert response.status_code == 200
+    async def make_request(self, method: str, url: str, payload: dict = None):
+        request = httpx.Request(method, url, headers=self._headers, json=payload)
+        response = await self._client_session.send(request)
 
-        return response.json()
+        return self._check_result(request, response)
+
+    @staticmethod
+    def _check_result(request: httpx.Request, response: httpx.Response):
+        if response.status_code != 200:
+            raise httpx.HTTPStatusError("Error status_code", request=request, response=response)
+
+        try:
+            return response.json()
+        except json.decoder.JSONDecodeError:
+            raise httpx.DecodingError("Error decode to json", request=request)

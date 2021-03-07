@@ -1,8 +1,8 @@
-import base64
 from datetime import datetime
 from uuid import uuid4
 
-from src.submodules.common.base_class import BaseClass, APIClass
+from src.submodules.common.base_class import APIClass
+from src.submodules.oauth.service import OAuth, OAuthUtils
 from .schemas import HubStaffActivityReports, HubStaffTotalActivity
 from .serializer import prepare_activity, prepare_task
 from .settings import hub_staff_settings
@@ -14,7 +14,7 @@ class Users(APIClass):
         """Получение пользовательских данных"""
         url = 'https://api.hubstaff.com/v2/users/me'  # Получение данных о пользователе по токену.
 
-        r_json = await self._rs_get(url)
+        r_json = await self.make_request("GET", url)
         return r_json['user']
 
 
@@ -24,7 +24,7 @@ class Organizations(APIClass):
         """Получение пользовательских данных"""
         url = "https://api.hubstaff.com/v2/organizations"
 
-        r_json = await self._rs_get(url)
+        r_json = await self.make_request("GET", url)
         return r_json['organizations']
 
 
@@ -43,7 +43,7 @@ class Activities(APIClass):
                f"&date[stop]={end_date.date().strftime('%Y-%m-%d')}" \
                f"&user_ids={hub_staff_user_id}'"
 
-        r_json = await self._rs_get(url)
+        r_json = await self.make_request("GET", url)
         return r_json['daily_activities']
 
 
@@ -52,7 +52,7 @@ class Tasks(APIClass):
     async def get_task(self, task_id: int):
         url = f"https://api.hubstaff.com/v2/tasks/{task_id}"
 
-        r_json = await self._rs_get(url)
+        r_json = await self.make_request("GET", url)
         return r_json['task']
 
 
@@ -104,37 +104,26 @@ class HubStaff(Users, Organizations, Activities, Tasks):
         return HubStaffActivityReports(reports=reports)
 
 
-class HubStaffOAuth(BaseClass):
+class HubStaffOAuth(OAuth):
     """Класс с полным процессом получения авторизационного токена для работы с HubStaff."""
 
+    client_id = hub_staff_settings.HUBSTAFF_CLIENT_ID
+    client_secret = hub_staff_settings.HUBSTAFF_SECRET_KEY
+
     @staticmethod
-    def get_verify_code_url(redirect_uri: str, state: str) -> str:
-        """Шаг №1 Получение ссылки с кодом подтверждения."""
+    def get_verify_code_url(redirect_uri: str, state: dict) -> str:
         return f"https://account.hubstaff.com/authorizations/new" \
                f"?client_id={hub_staff_settings.HUBSTAFF_CLIENT_ID}" \
                f"&response_type=code" \
                f"&nonce={str(uuid4())}" \
-               f"&state={state}" \
+               f"&state={OAuthUtils.encode_state_to_base64(state)}" \
                f"&scope=openid hubstaff:read profile tasks:read" \
                f"&redirect_uri={redirect_uri}" \
 
 
-    async def get_auth_token(self, verify_code: str, redirect_uri: str) -> dict:
-        """Шаг №2 Получение токена авторизации с применением кода подтверждения."""
-        url = "https://account.hubstaff.com/access_tokens" \
-              "?grant_type=authorization_code" \
-              f"&code={verify_code}" \
-              f"&redirect_uri={redirect_uri}"
-
-        headers = {"Authorization": f"Basic {self.get_basic_token_to_base64()}"}
-
-        response = await self.client.post(url=url, headers=headers)
-        assert response.status_code == 200
-
-        return response.json()
-
     @staticmethod
-    def get_basic_token_to_base64() -> str:
-        """Шифрование Basic токена."""
-        client_data_to_bytes = f'{hub_staff_settings.HUBSTAFF_CLIENT_ID}:{hub_staff_settings.HUBSTAFF_SECRET_KEY}'.encode()
-        return base64.b64encode(client_data_to_bytes).decode()
+    def get_auth_token_url(code: str, redirect_uri: str = None):
+        return "https://account.hubstaff.com/access_tokens" \
+               "?grant_type=authorization_code" \
+               f"&code={code}" \
+               f"&redirect_uri={redirect_uri}"

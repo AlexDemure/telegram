@@ -1,5 +1,6 @@
 
-from src.submodules.common.base_class import BaseClass, APIClass
+from src.submodules.common.base_class import APIClass
+from src.submodules.oauth.service import OAuth, OAuthUtils
 from .schemas import ClickUpTasks
 from .serializer import prepare_task
 from .settings import click_up_settings
@@ -11,7 +12,7 @@ class Users(APIClass):
         """Получение пользовательских данных"""
         url = 'https://api.clickup.com/api/v2/user'  # Получение данных о пользователе по токену.
 
-        r_json = await self._rs_get(url)
+        r_json = await self.make_request("GET", url)
         return r_json['user']
 
 
@@ -20,7 +21,7 @@ class Teams(APIClass):
     async def get_teams(self) -> list:
         url = 'https://api.clickup.com/api/v2/team'  # Получение данных о пользователе по токену.
 
-        r_json = await self._rs_get(url)
+        r_json = await self.make_request("GET", url)
         return r_json['teams']
 
 
@@ -29,7 +30,7 @@ class Tasks(APIClass):
     async def get_tasks(self, team_id: int, click_user_id: int):
         url = f"https://api.clickup.com/api/v2/team/{team_id}/task?assignees%5B%5D={click_user_id}"
 
-        r_json = await self._rs_get(url)
+        r_json = await self.make_request("GET", url)
         return r_json['tasks']
 
 
@@ -58,26 +59,23 @@ class ClickUp(Users, Teams, Tasks):
         return ClickUpTasks(tasks=prepared_tasks)
 
 
-class ClickUpOAuth(BaseClass):
+class ClickUpOAuth(OAuth):
     """Класс с полным процессом получения авторизационного токена для работы с ClickUp."""
 
+    client_id = click_up_settings.CLICKUP_CLIENT_ID
+    client_secret = click_up_settings.CLICKUP_SECRET_KEY
+
     @staticmethod
-    def get_verify_code_url(redirect_uri: str, state: str) -> str:
+    def get_verify_code_url(redirect_uri: str, state: dict) -> str:
         """Шаг №1 Получение ссылки с кодом подтверждения."""
         return f"https://app.clickup.com/api" \
                f"?client_id={click_up_settings.CLICKUP_CLIENT_ID}" \
-               f"&state={state}" \
+               f"&state={OAuthUtils.encode_state_to_base64(state)}" \
                f"&redirect_uri={redirect_uri}"
 
-    async def get_auth_token(self, verify_code: str) -> str:
-        """Шаг №2 Получение токена авторизации с применением кода подтверждения."""
-
-        url = f'https://api.clickup.com/api/v2/oauth/token?' \
+    @classmethod
+    def get_auth_token_url(cls, code: str, redirect_uri: str = None):
+        return f'https://api.clickup.com/api/v2/oauth/token?' \
               f'client_id={click_up_settings.CLICKUP_CLIENT_ID}&' \
               f'client_secret={click_up_settings.CLICKUP_SECRET_KEY}&' \
-              f'code={verify_code}'
-
-        response = await self.client.post(url=url)
-        assert response.status_code == 200
-
-        return response.json()['access_token']
+              f'code={code}'
