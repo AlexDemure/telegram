@@ -101,7 +101,9 @@ class ClickUp(Users, Teams, Spaces, Folders, Lists, Tasks):
         prepared_tasks = []
         for team in teams:
             tasks = await self.get_tasks(team['id'], click_user_id)
-            prepared_tasks += [prepare_task(x) for x in tasks if x['folder']['name'] != "Backlog"]
+            prepared_tasks += [
+                prepare_task(x) for x in tasks if x['folder']['name'] != "Backlog" and x['list']['name'] != "Backlog"
+            ]
 
         return ClickUpTasks(tasks=prepared_tasks)
 
