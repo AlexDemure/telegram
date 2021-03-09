@@ -3,7 +3,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.types import ParseMode
 
 from src.apps.users.logic import get_user
-from src.bot.commands.dispatcher import dp
+from src.bot.dispatcher import dp
 from src.bot.keyboards.clickup import menu as clickup_menu, start as clickup_start_menu
 from src.bot.keyboards.hubstaff import menu as hubstaff_menu, start as hubstaff_start_menu
 from src.core.enums import ServicesEnum

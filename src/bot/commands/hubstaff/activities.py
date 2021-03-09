@@ -6,7 +6,7 @@ from aiogram.types import ParseMode
 
 from src.apps.hubstaff.logic import get_activities_by_period
 from src.apps.users.logic import get_user
-from src.bot.commands.dispatcher import dp, bot
+from src.bot.dispatcher import dp, bot
 from src.bot.keyboards.hubstaff import menu, activities
 from src.bot.keyboards.hubstaff.activities import WorkLogHubStaffKeysEnum
 from src.bot.keyboards.hubstaff.menu import MenuHubStaffKeysEnum

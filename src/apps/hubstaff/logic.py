@@ -5,7 +5,7 @@ import httpx
 
 from src.apps.users.logic import bind_data
 from src.apps.users.schemas import UserData
-from src.bot.commands.dispatcher import bot
+from src.bot.dispatcher import bot
 from src.core.enums import WebhookUrlsEnum
 from src.submodules.hubstaff.schemas import HubStaffActivityReports
 from src.submodules.hubstaff.serializer import prepare_user_data

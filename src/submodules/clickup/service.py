@@ -1,7 +1,7 @@
 
 from src.submodules.common.base_class import APIClass
 from src.submodules.oauth.service import OAuth, OAuthUtils
-from .schemas import ClickUpTasks
+from .schemas import ClickUpTasks, ClickUpCreateTask
 from .serializer import prepare_task
 from .settings import click_up_settings
 
@@ -15,6 +15,13 @@ class Users(APIClass):
         r_json = await self.make_request("GET", url)
         return r_json['user']
 
+    async def get_users_by_task(self, task_id: str) -> dict:
+        """Получение пользовательских данных"""
+        url = f'https://api.clickup.com/api/v2/task/{task_id}/member'
+
+        r_json = await self.make_request("GET", url)
+        return r_json['members']
+
 
 class Teams(APIClass):
 
@@ -25,6 +32,35 @@ class Teams(APIClass):
         return r_json['teams']
 
 
+class Spaces(APIClass):
+
+    async def get_spaces(self, team_id: int) -> list:
+        url = f"https://api.clickup.com/api/v2/team/{team_id}/space?archived=false"
+        r_json = await self.make_request("GET", url)
+        return r_json['spaces']
+
+
+class Folders(APIClass):
+
+    async def get_folders(self, space_id: int) -> list:
+        url = f"https://api.clickup.com/api/v2/space/{space_id}/folder?archived=false"
+        r_json = await self.make_request("GET", url)
+        return r_json['folders']
+
+    async def get_folder(self, folder_id: int) -> list:
+        url = f"https://api.clickup.com/api/v2/folder/{folder_id}"
+        r_json = await self.make_request("GET", url)
+        return r_json
+
+
+class Lists(APIClass):
+
+    async def get_lists(self, folder_id: int):
+        url = f"https://api.clickup.com/api/v2/folder/{folder_id}/list?archived=false"
+        r_json = await self.make_request("GET", url)
+        return r_json['lists']
+
+
 class Tasks(APIClass):
 
     async def get_tasks(self, team_id: int, click_user_id: int):
@@ -33,8 +69,19 @@ class Tasks(APIClass):
         r_json = await self.make_request("GET", url)
         return r_json['tasks']
 
+    async def create_task(self, list_id: int, task: ClickUpCreateTask):
+        url = f"https://api.clickup.com/api/v2/list/{list_id}/task/"
+        r_json = await self.make_request("POST", url, task.dict())
+        return r_json
 
-class ClickUp(Users, Teams, Tasks):
+    async def get_task(self, task_id: str):
+        url = f"https://api.clickup.com/api/v2/task/{task_id}/"
+
+        r_json = await self.make_request("GET", url)
+        return r_json
+
+
+class ClickUp(Users, Teams, Spaces, Folders, Lists, Tasks):
     """
     Класс для работы с ClickUP API.
     """

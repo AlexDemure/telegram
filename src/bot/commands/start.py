@@ -7,7 +7,7 @@ from aiogram.types import ParseMode
 
 from src.apps.users.logic import add_new_user
 from src.apps.users.schemas import UserCreate
-from src.bot.commands.dispatcher import dp
+from src.bot.dispatcher import dp
 from src.bot.keyboards import start
 from src.bot.keyboards.common import CommonKeysEnum
 

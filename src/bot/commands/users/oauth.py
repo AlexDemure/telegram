@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.dispatcher.filters import Text
 from aiogram.types import ParseMode, ReplyKeyboardRemove
 
-from src.bot.commands.dispatcher import dp, bot
+from src.bot.dispatcher import dp, bot
 from src.bot.keyboards.clickup.start import StartClickUpMenuKeysEnum
 from src.bot.keyboards.hubstaff.start import StartHubStaffMenuKeysEnum
 from src.bot.messages.users.oauth import prepare_response_get_verify_code

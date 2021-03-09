@@ -4,7 +4,7 @@ from aiogram.types import ParseMode
 
 from src.apps.hubstaff.logic import get_activities_by_period
 from src.apps.users.logic import get_users
-from src.bot.commands.dispatcher import bot
+from src.bot.dispatcher import bot
 from src.bot.messages.hubstaff.activities import (
     prepare_response_today_time_tracked, prepare_response_today_activity
 )

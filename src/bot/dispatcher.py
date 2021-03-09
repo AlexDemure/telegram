@@ -15,7 +15,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 dp.middleware.setup(LoggingMiddleware())
 
-from .clickup import tasks
-from .hubstaff import activities
-from .users import oauth, services
-from . import start
+from src.bot.commands.clickup import tasks
+from src.bot.commands.hubstaff import activities
+from src.bot.commands.users import oauth, services
+from src.bot.commands import start
+from src.bot.callbacks.clickup import tasks

@@ -2,7 +2,7 @@ from aiogram.types import ParseMode
 
 from src.apps.clickup.logic import get_user_tasks, get_user_tasks_with_unset_time
 from src.apps.users.logic import get_users
-from src.bot.commands.dispatcher import bot
+from src.bot.dispatcher import bot
 from src.bot.messages.clickup.tasks import (
     prepare_response_list_tasks, prepare_response_list_tasks_with_unset_time
 )

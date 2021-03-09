@@ -27,6 +27,7 @@ def decode_data_from_base64(base64_string: str) -> dict:
 
 
 def get_webhook_url(endpoint: str, short_url=True) -> str:
+    """Генерирование разных форматов путей к webhook endpoint."""
     if short_url:
         return f"{settings.WEBHOOK_PATH}/{endpoint}"
     else:

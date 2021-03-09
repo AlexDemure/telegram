@@ -1,5 +1,3 @@
-from enum import Enum
-
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 from src.core.enums import ServicesEnum

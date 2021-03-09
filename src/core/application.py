@@ -1,6 +1,8 @@
+import logging
+
 from aiohttp import web
 
-from src.bot.commands.dispatcher import dp, bot
+from src.bot.dispatcher import dp, bot
 from src.core import scheduler
 from src.core.config import settings
 from src.core.urls import routes
@@ -9,7 +11,7 @@ from src.db.database import users_db
 
 async def on_startup(app):
     webhook = await bot.get_webhook_info()
-    print(webhook)
+    logging.info(f"Webhook data: {webhook}")
 
     users_db.init_connection()
     scheduler.start()

@@ -6,17 +6,18 @@ from src.bot.keyboards.common import CommonKeysEnum
 
 
 class MenuClickUpKeysEnum(Enum):
-    task_list = "Список задач"
-    task_list_with_unset_time = "Задачи без запланированного времени"
+    me_task_menu = "Мои задачи ClickUp"
+    task_manager = "Управление задачами в ClickUp"
+    main = "В меню ClickUp"
 
 
 keyboards = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text=MenuClickUpKeysEnum.task_list.value),
+            KeyboardButton(text=MenuClickUpKeysEnum.me_task_menu.value),
         ],
         [
-            KeyboardButton(text=MenuClickUpKeysEnum.task_list_with_unset_time.value),
+            KeyboardButton(text=MenuClickUpKeysEnum.task_manager.value),
         ],
         [
             KeyboardButton(text=CommonKeysEnum.main.value),

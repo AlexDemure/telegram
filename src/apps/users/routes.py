@@ -3,7 +3,7 @@ from aiohttp import web
 
 from src.apps.clickup.logic import add_click_up_data_by_user
 from src.apps.hubstaff.logic import add_hub_staff_data_by_user
-from src.bot.commands.dispatcher import bot
+from src.bot.dispatcher import bot
 from src.bot.keyboards.clickup import menu as clickup_keyboards
 from src.bot.keyboards.hubstaff import menu as hubstaff_keyboards
 from src.core.enums import ServicesEnum

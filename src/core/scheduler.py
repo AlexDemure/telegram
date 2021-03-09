@@ -5,6 +5,7 @@ from src.apps.hubstaff.tasks import daily_send_today_time_tracked_and_activity
 
 
 def start():
+    """Запуск событий по Cron времени."""
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
     scheduler.add_job(daily_send_list_tasks, 'cron', hour=9)
     scheduler.add_job(daily_send_list_tasks_with_unset_time, 'cron', hour=9)
