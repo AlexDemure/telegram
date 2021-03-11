@@ -154,7 +154,7 @@ async def get_task_input_id(message: types.Message):
         return
 
     await message.reply(
-        f"Введите ID задачи:",
+        f"Введите ID задачи или ссылку на нее:",
         reply_markup=ReplyKeyboardRemove()
     )
 
@@ -179,7 +179,13 @@ async def get_task_send_request(message: types.Message,  state: FSMContext):
         await state.finish()
         return
 
-    task, members = await get_task_by_id(user, message.text)
+    link_items = message.text.split("https://app.clickup.com/t/")
+    if len(link_items) > 0:
+        task_id = link_items[-1]
+    else:
+        task_id = message.text
+
+    task, members = await get_task_by_id(user, task_id)
     if task is None:
         await message.reply(
             f"Задача с таким ID не найдена.",
