@@ -17,7 +17,7 @@ from src.bot.messages.clickup.tasks import (
     prepare_response_list_tasks_with_unset_time, prepare_response_task_data
 )
 from src.bot.states.clickup.tasks import CreateTaskState, GetTaskState, GetTaskListByUser
-from src.submodules.clickup.enums import TagsEnumsByEmoji, PriorityEnumsByEmoji
+from src.submodules.clickup.enums import TagsEnumsByEmoji, PriorityEnumsByEmoji, Teams
 from src.submodules.clickup.schemas import ClickUpCreateTask
 
 
@@ -437,6 +437,13 @@ async def get_tasks_by_click_up_user_choose_assigned(message: types.Message):
         await message.reply(
             f"Такой пользователь не найден.\nПожалуйста подключите занова ClickUp.",
             reply_markup=start_keyboards.keyboards
+        )
+        return
+
+    if user.click_up.role not in [Teams.admin.value, Teams.owner.value]:
+        await message.reply(
+            f"У вас недостаточно прав для этой команды.",
+            reply_markup=tasks_click_up_keyboards.task_manager_keyboards
         )
         return
 

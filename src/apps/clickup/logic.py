@@ -20,9 +20,28 @@ async def add_click_up_data_by_user(user_id: int, code: str) -> None:
     """Добавление данных из ClickUp пользователю."""
     token_data = await ClickUpOAuth().get_token(code)
 
-    click_up_user_data = await ClickUp(token_data['access_token']).get_user()
+    clickup = ClickUp(token_data['access_token'])
 
-    await bind_data(user_id, prepare_user_data(click_up_user_data, token_data))
+    user_data = await clickup.get_user_by_token()
+
+    # Пытаемся получить Роль пользователя
+    # т.к. получение пользователя из токена не показывает какая роль у него.
+    user_role = None
+    teams = await clickup.get_teams()
+    for team in teams:
+        filtered_members = [
+            member['user']['role'] for member in team['members'] if member['user']['id'] == user_data['id']
+        ]
+        if len(filtered_members) > 0:
+            user_role = filtered_members[0]
+            break
+
+    if user_role is None:
+        user_role = Teams.not_set.value
+
+    user_data['role'] = user_role
+
+    await bind_data(user_id, prepare_user_data(user_data, token_data))
 
 
 async def get_user_tasks(user_data: UserData, assigned_user_id: str = None) -> Optional[ClickUpTasks]:

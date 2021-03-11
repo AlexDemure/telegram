@@ -106,14 +106,17 @@ class Teams(Enum):
     admin = 2
     member = 3
     guest = 4
+    not_set = 5
 
     @property
     def preview_name(self):
         if self is self.owner:
-            return "Управленцы" # Переопределение значения внутри компании
+            return "Управленцы"  # Переопределение значения внутри компании
         elif self is self.admin:
             return "Менеджеры"  # Переопределение значения внутри компании
         elif self is self.member:
             return "Разработчики"  # Переопределение значения внутри компании
-        else:
+        elif self is self.member:
             return "Гости"
+        else:
+            return "Не установлено"

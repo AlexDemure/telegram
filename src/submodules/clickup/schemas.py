@@ -66,7 +66,8 @@ class ClickUpUser(BaseModel):
 
 
 class ClickUpUserData(ClickUpUser):
-    """Схема для работы с токенами."""
+    """Схема для работы с токенами и ролями."""
+    role: int
     auth_token: str
 
 

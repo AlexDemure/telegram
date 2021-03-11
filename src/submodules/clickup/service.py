@@ -8,12 +8,23 @@ from .settings import click_up_settings
 
 class Users(APIClass):
 
-    async def get_user(self) -> dict:
+    async def get_user_by_token(self) -> dict:
         """Получение пользовательских данных"""
         url = 'https://api.clickup.com/api/v2/user'  # Получение данных о пользователе по токену.
 
         r_json = await self.make_request("GET", url)
         return r_json['user']
+
+    async def get_user_by_team_id_and_user_id(self, team_id: int, user_id: int) -> dict:
+        """
+        Получение пользовательских данных.
+
+        Только для команд с Enterprise статусом. Без него будет возвращаться 403.
+        """
+        url = f'https://api.clickup.com/api/v2/team/{team_id}/user/{user_id}'
+
+        r_json = await self.make_request("GET", url)
+        return r_json['member']['user']
 
     async def get_users_by_task(self, task_id: str) -> dict:
         """Получение пользовательских данных"""

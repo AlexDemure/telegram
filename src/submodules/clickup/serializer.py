@@ -50,6 +50,7 @@ def prepare_user_data(user_data: dict, token_data: dict) -> ClickUpUserData:
         id=user_data['id'],
         username=user_data['username'],
         email=user_data['email'],
+        role=user_data['role'],
         auth_token=token_data['access_token'],  # Type Bearer ставить не надо.
     )
 
