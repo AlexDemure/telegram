@@ -12,7 +12,7 @@ class APIClass:
 
     def __init__(self, access_token: str = None):
         self._headers: dict = {
-            "Accept": "application/json",
+            # "Accept": "application/json",
             'Content-Type': 'application/json',
         }
         if access_token is not None:
@@ -36,10 +36,22 @@ class APIClass:
 
         return self._check_result(request, response)
 
+    async def send_file(self, method: str, url: str, data):
+        self._headers['Content-Type'] = "multipart/form-data"
+
+        request = httpx.Request(method, url, headers=self._headers, data=data)
+        response = await self._client_session.send(request)
+
+        return self._check_result(request, response)
+
     @staticmethod
     def _check_result(request: httpx.Request, response: httpx.Response):
         if response.status_code != 200:
-            raise httpx.HTTPStatusError("Error status_code", request=request, response=response)
+            raise httpx.HTTPStatusError(
+                f"Error status_code: {response.text}",
+                request=request,
+                response=response
+            )
 
         try:
             return response.json()

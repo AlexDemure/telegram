@@ -1,4 +1,4 @@
-import logging
+# import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -11,9 +11,9 @@ bot = Bot(token=settings.TELEGRAM_API_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
-dp.middleware.setup(LoggingMiddleware())
+# dp.middleware.setup(LoggingMiddleware())
 
 from src.bot.commands.clickup import tasks
 from src.bot.commands.hubstaff import activities

@@ -80,6 +80,12 @@ class Tasks(APIClass):
         r_json = await self.make_request("GET", url)
         return r_json
 
+    async def add_task_attachment(self, task_id: str, data):
+        url = f"https://api.clickup.com/api/v2/task/{task_id}/attachment"
+
+        r_json = await self.send_file("POST", url, data=data)
+        return r_json
+
 
 class ClickUp(Users, Teams, Spaces, Folders, Lists, Tasks):
     """

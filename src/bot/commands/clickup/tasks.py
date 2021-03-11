@@ -1,3 +1,4 @@
+import tempfile
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -19,6 +20,7 @@ from src.bot.messages.clickup.tasks import (
 from src.bot.states.clickup.tasks import CreateTaskState, GetTaskState, GetTaskListByUser
 from src.submodules.clickup.enums import TagsEnumsByEmoji, PriorityEnumsByEmoji
 from src.submodules.clickup.schemas import ClickUpCreateTask
+from src.submodules.clickup.service import ClickUp
 
 
 @dp.message_handler(Text(equals=[menu_click_up_keyboards.MenuClickUpKeysEnum.main.value]), state=None)
@@ -422,13 +424,60 @@ async def create_task_send_request(message: types.Message, state: FSMContext):
             priority=PriorityEnumsByEmoji(data['priority']).clickup_priority_value
         )
     )
+    await state.update_data(task_id=new_task['id'])
+
     await bot.send_message(
         message.chat.id,
-        f"Задача создана ID: {new_task['id']}.",
+        f"Задача создана ID: {new_task['url']}.",
         reply_markup=tasks_click_up_keyboards.task_manager_keyboards
     )
-    await state.finish()
+    await message.reply(
+        f'Опциональное действие\n'
+        f'Нужно ли добавить к задаче файл? (Введите текст "Нет" для выхода)',
+        reply_markup=ReplyKeyboardRemove()
+    )
+    await CreateTaskState.add_attachments.set()
 
+
+@dp.message_handler(state=CreateTaskState.add_attachments)
+async def create_task_add_attachment(message: types.Message, state: FSMContext):
+    """
+    Шаг №10 Заполнение данных о задачи, Опциональное действие.
+
+    :return: Список InlineButtons.
+    Ожидается выбор пользователя и уведомленя на callback handler.
+    """
+    user = await get_user(message.chat.id)
+    if not user:
+        await message.reply(
+            f"Такой пользователь не найден.\nПожалуйста подключите занова ClickUp.",
+            reply_markup=start_keyboards.keyboards
+        )
+        await state.finish()
+        return
+
+    if message.text is not None:
+        await bot.send_message(
+            message.chat.id,
+            f"Добавление файлов к задаче отменено.",
+            reply_markup=tasks_click_up_keyboards.task_manager_keyboards
+        )
+        return
+
+    data = await state.get_data()
+
+    if len(message.photo) > 0:
+        with tempfile.NamedTemporaryFile(suffix=f'.jpeg') as fp:
+            await message.photo[-1].download(fp.name)
+
+            values = dict(
+                attachment=fp.file,
+                filename=fp.name.split('/')[-1]
+            )
+            await ClickUp(user.click_up.auth_token).add_task_attachment(data['task_id'], values)
+
+
+    # await message.document.download(message.document.file_name)
 
 @dp.message_handler(Text(equals=[tasks_click_up_keyboards.TaskManagerClickUpKeysEnum.task_list_by_user.value]), state=None)
 async def get_tasks_by_click_up_user_choose_assigned(message: types.Message):

@@ -11,6 +11,7 @@ class CreateTaskState(StatesGroup):
     add_priority = State()
     check_data = State()
     create_task = State()
+    add_attachments = State()
 
 
 class GetTaskState(StatesGroup):
