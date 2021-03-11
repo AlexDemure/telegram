@@ -26,7 +26,7 @@ def decode_data_from_base64(base64_string: str) -> dict:
     return json.loads(base64.b64decode(base64_string).decode())
 
 
-def get_webhook_url(endpoint: str, short_url=True) -> str:
+def get_webhook_url(endpoint: str, short_url: bool = True) -> str:
     """Генерирование разных форматов путей к webhook endpoint."""
     if short_url:
         return f"{settings.WEBHOOK_PATH}/{endpoint}"

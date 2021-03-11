@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class PriorityEnumsByEmoji(Enum):
+class Priority(Enum):
     urgent = "urgent"
     high = "high"
     normal = "normal"
@@ -60,7 +60,7 @@ class PriorityEnumsByEmoji(Enum):
             return "Не установлено"
 
 
-class TagsEnumsByEmoji(Enum):
+class Tags(Enum):
     frontend = "frontend"
     backend = "backend"
     bug = "bug"
@@ -120,3 +120,13 @@ class Teams(Enum):
             return "Гости"
         else:
             return "Не установлено"
+
+
+class ClickUpEvents(Enum):
+    task_assignee = "taskAssigneeUpdated"  # Обновление в назначении Исполнителя
+    comment_post = "taskCommentPosted"  # Добавление комментария к задаче
+
+
+class ClickUpAssigneeTypes(Enum):
+    add = "assignee_add"
+    remove = "assignee_rem"

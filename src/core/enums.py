@@ -9,4 +9,4 @@ class ServicesEnum(Enum):
 
 class WebhookUrlsEnum(Enum):
     oauth = "login"
-
+    click_up_webhook_notifications = "clickup/notifications"

@@ -118,6 +118,17 @@ class ClickUp(Users, Teams, Spaces, Folders, Lists, Tasks):
 
         return ClickUpTasks(tasks=prepared_tasks)
 
+    async def start_webhook_accepting(self, team_id: int, webhook_endpoint: str):
+        """Метод для запуска получения уведомлений по разным событиям в кликап связанных с пользователем."""
+        url = f"https://api.clickup.com/api/v2/team/{team_id}/webhook"
+
+        # Endpoint - куда кликап будет отправлять запросы.
+        # Events - список всех событий в clickup.
+        payload = dict(endpoint=webhook_endpoint, events=["*"])
+
+        r_json = await self.make_request("POST", url, payload)
+        return r_json
+
 
 class ClickUpOAuth(OAuth):
     """Класс с полным процессом получения авторизационного токена для работы с ClickUp."""

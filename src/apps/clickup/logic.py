@@ -1,18 +1,26 @@
-import httpx
 import logging
 from typing import Optional
 
+import httpx
+from aiogram.types import ParseMode
 from pydantic import validate_arguments
 
 from src.apps.users.logic import bind_data
+from src.apps.users.logic import get_click_up_user
 from src.apps.users.schemas import UserData
-from src.submodules.clickup.enums import PriorityEnumsByEmoji, TagsEnumsByEmoji, Teams
+from src.bot.dispatcher import bot
+from src.bot.messages.clickup.tasks import (
+    prepare_response_notification_assignee, prepare_response_notification_comment_post
+)
+from src.core.enums import WebhookUrlsEnum
+from src.submodules.clickup.enums import Priority, Tags, Teams, ClickUpAssigneeTypes
 from src.submodules.clickup.schemas import (
-    ClickUpTasks, UserGroups, ClickUpUser, TeamData, ClickUpTaskItem,
-    ClickUpData, FolderData, ListData, SpaceData, ClickUpCreateTask, MemberItem
+    ClickUpTasks, UserGroups, ClickUpUser, TeamData, ClickUpData, FolderData, ListData, SpaceData, ClickUpCreateTask,
+    MemberItem
 )
 from src.submodules.clickup.serializer import prepare_user_data, prepare_task
 from src.submodules.clickup.service import ClickUp, ClickUpOAuth
+from src.utils import get_webhook_url
 
 
 @validate_arguments
@@ -33,6 +41,15 @@ async def add_click_up_data_by_user(user_id: int, code: str) -> None:
             member['user']['role'] for member in team['members'] if member['user']['id'] == user_data['id']
         ]
         if len(filtered_members) > 0:
+            # Отправка уведомлений в ClickUP что по этой команде мы ждем уведомления.
+            await clickup.start_webhook_accepting(
+                team_id=team['id'],
+                webhook_endpoint=get_webhook_url(
+                    WebhookUrlsEnum.click_up_webhook_notifications.value,
+                    short_url=False
+                )
+            )
+
             user_role = filtered_members[0]
             break
 
@@ -57,9 +74,9 @@ async def get_user_tasks(user_data: UserData, assigned_user_id: str = None) -> O
 
     data.tasks.sort(
         key=lambda x: (
-            PriorityEnumsByEmoji(x.priority).priority_value,
+            Priority(x.priority).priority_value,
             [
-                TagsEnumsByEmoji(x.name).priority_value for x in x.tags
+                Tags(x.name).priority_value for x in x.tags
             ]
         ),
         reverse=True
@@ -168,7 +185,7 @@ async def create_task(user_data: UserData, list_id: int, task_data: ClickUpCreat
     return await ClickUp(user_data.click_up.auth_token).create_task(list_id, task_data)
 
 
-async def get_task_by_id(user_data: UserData, task_id: str) -> tuple:
+async def get_task_by_id(user_data: UserData, task_id: str, is_need_members: bool = True) -> tuple:
     clickup = ClickUp(user_data.click_up.auth_token)
 
     try:
@@ -179,12 +196,74 @@ async def get_task_by_id(user_data: UserData, task_id: str) -> tuple:
 
     prepared_task = prepare_task(task)
 
-    members = await clickup.get_users_by_task(prepared_task.id)
-    prepared_members = [
-        MemberItem(
-            id=x['id'], name=x['username']
-        ) for x in members if x['id'] in [y['id'] for y in prepared_task.assigned]
-    ]
-
+    if is_need_members:
+        members = await clickup.get_users_by_task(prepared_task.id)
+        prepared_members = [
+            MemberItem(
+                id=x['id'], name=x['username']
+            ) for x in members if x['id'] in [y['id'] for y in prepared_task.assigned]
+        ]
+    else:
+        prepared_members = None
     return prepared_task, prepared_members
 
+
+async def send_assignee_notification(
+        assignee_user_id: int,
+        task_id: str,
+        assignee_type: ClickUpAssigneeTypes,
+        creator: str,
+) -> None:
+    """
+    Отправка уведомления об назначении или снятии исполнителя по задаче.
+
+    :param assignee_user_id: ID-clickup пользователя на которого нацеленно событие.
+    :param assignee_type: Тип уведомления. Add - добавление Remove - Удаление
+    :param creator: Кто сделал это событие.
+    """
+    user_data = await get_click_up_user(assignee_user_id, get_owner_if_null=True)
+    if not user_data:
+        return
+
+    # Т.к. происходит жесткая привязка пользователя из события списко причастных к задаче мы не собираем.
+    # Отправляем сообщение единственному пользователю к которому относится событие.
+    task, members = await get_task_by_id(user_data, task_id, is_need_members=False)
+    response = prepare_response_notification_assignee(
+        task=task,
+        assignee_type=assignee_type,
+        creator=creator
+    )
+
+    await bot.send_message(user_data.user_id, response, parse_mode=ParseMode.HTML)
+
+
+async def send_comment_post_notification(
+        click_user_id: int,
+        task_id: str,
+        comment: str,
+        creator: str
+) -> None:
+    """
+    Отправка уведомления об добавление комментарья к задаче с отметкой пользователя.
+
+    :param click_user_id: ID-clickup пользователя кто сделал это событие.
+    :param comment: Комментарий к задаче. На выходе обрезается до 1024 символов.
+    :param creator: Кто сделал это событие.
+    """
+    user_data = await get_click_up_user(click_user_id, get_owner_if_null=True)
+    if not user_data:
+        return
+
+    task, members = await get_task_by_id(user_data, task_id)
+    response = prepare_response_notification_comment_post(
+        task=task,
+        comment=comment,
+        creator=creator
+    )
+    # Так как у нас не жесткой привязки к опрд пользователю
+    # мы делаем рассылку на всех кто причастен к этой задаче.
+    for member in members:
+        assignee = await get_click_up_user(member.id)
+        if not assignee:
+            continue
+        await bot.send_message(assignee.user_id, response, parse_mode=ParseMode.HTML)

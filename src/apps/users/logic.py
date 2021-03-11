@@ -4,7 +4,10 @@ from typing import Optional, List, Union
 
 from pydantic import validate_arguments
 
-from src.apps.users.crud import _add_user, _get_user, _get_users
+from src.apps.users.crud import (
+    _add_user, _get_user,  _get_click_up_owner,
+    _get_users, _get_user_by_click_up_id,
+)
 from src.apps.users.crud import update_document
 from src.apps.users.schemas import UserData, UserCreate
 from src.apps.users.serializer import prepare_user_data
@@ -60,3 +63,18 @@ async def bind_data(user_id: int, data: Union[ClickUpUserData, HubStaffUserData]
 
     await update_document(document_id, user_data)
     logging.debug("Data is bind to user.")
+
+
+@validate_arguments
+async def get_click_up_user(click_up_user_id: int, get_owner_if_null: bool = False) -> Optional[UserData]:
+    """Получение пользователя по click_up_user_id"""
+    user_data = await _get_user_by_click_up_id(click_up_user_id)
+    if user_data:
+        return prepare_user_data(user_data)
+    else:
+        if get_owner_if_null:
+            user_data = await _get_click_up_owner()
+            if user_data:
+                return prepare_user_data(user_data)
+
+        return None

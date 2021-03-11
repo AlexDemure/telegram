@@ -1,13 +1,13 @@
 from typing import List
 
-from .enums import TagsEnumsByEmoji
+from .enums import Tags
 from .schemas import ClickUpTaskItem, ClickUpTagItem, ClickUpUserData
 
 
 def prepare_tags(tags: list) -> List[ClickUpTagItem]:
     prepared_tags = []
     for tag in tags:
-        if getattr(TagsEnumsByEmoji, tag['name'], None):  # Отображаем лишь те теги которые есть у нас в Enums
+        if getattr(Tags, tag['name'], None):  # Отображаем лишь те теги которые есть у нас в Enums
             prepared_tags.append(ClickUpTagItem(name=tag['name']))
 
     return prepared_tags
@@ -18,7 +18,7 @@ def tags_list_to_emoji_str(tags: List[ClickUpTagItem]) -> str:
     tags_to_str = ""
     for tag in tags:
         try:
-            emoji = TagsEnumsByEmoji(tag.name).emoji
+            emoji = Tags(tag.name).emoji
             if emoji is not None:
                 tags_to_str += f"{emoji}"
         except ValueError:

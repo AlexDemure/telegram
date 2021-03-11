@@ -17,7 +17,7 @@ from src.bot.messages.clickup.tasks import (
     prepare_response_list_tasks_with_unset_time, prepare_response_task_data
 )
 from src.bot.states.clickup.tasks import CreateTaskState, GetTaskState, GetTaskListByUser
-from src.submodules.clickup.enums import TagsEnumsByEmoji, PriorityEnumsByEmoji, Teams
+from src.submodules.clickup.enums import Tags, Priority, Teams
 from src.submodules.clickup.schemas import ClickUpCreateTask
 
 
@@ -326,7 +326,7 @@ async def create_task_add_tags(message: types.Message, state: FSMContext):
     Ожидается выбор пользователя и уведомленя на callback handler.
     """
     choice = tasks_click_up_keyboards.generate_inline_buttons_for_click_up_tags(
-        tags=[(e.value, e.preview_name) for e in TagsEnumsByEmoji]
+        tags=[(e.value, e.preview_name) for e in Tags]
     )
     await bot.send_message(message.chat.id, f"{choice['response']}", reply_markup=choice['keyboards'])
     await CreateTaskState.add_tags.set()
@@ -347,7 +347,7 @@ async def create_task_add_priority(message: types.Message, state: FSMContext):
         return
 
     choice = tasks_click_up_keyboards.generate_inline_buttons_for_click_up_priority(
-        priorities=[(e.value, e.preview_name) for e in PriorityEnumsByEmoji if e != PriorityEnumsByEmoji.NOT_SET]
+        priorities=[(e.value, e.preview_name) for e in Priority if e != Priority.NOT_SET]
     )
 
     await bot.send_message(message.chat.id, f"{choice['response']}", reply_markup=choice['keyboards'])
@@ -418,8 +418,8 @@ async def create_task_send_request(message: types.Message, state: FSMContext):
             name=data['name'],
             description=data['desc'],
             assignees=[int(data['click_up_user_id']),],
-            tags=[TagsEnumsByEmoji(x).value for x in data['tags']],
-            priority=PriorityEnumsByEmoji(data['priority']).clickup_priority_value
+            tags=[Tags(x).value for x in data['tags']],
+            priority=Priority(data['priority']).clickup_priority_value
         )
     )
     await bot.send_message(
