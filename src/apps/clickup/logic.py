@@ -41,15 +41,6 @@ async def add_click_up_data_by_user(user_id: int, code: str) -> None:
             member['user']['role'] for member in team['members'] if member['user']['id'] == user_data['id']
         ]
         if len(filtered_members) > 0:
-            # Отправка уведомлений в ClickUP что по этой команде мы ждем уведомления.
-            await clickup.start_webhook_accepting(
-                team_id=team['id'],
-                webhook_endpoint=get_webhook_url(
-                    WebhookUrlsEnum.click_up_webhook_notifications.value,
-                    short_url=False
-                )
-            )
-
             user_role = filtered_members[0]
             break
 
