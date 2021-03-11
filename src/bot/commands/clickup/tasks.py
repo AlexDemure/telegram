@@ -5,7 +5,8 @@ from aiogram.types import ParseMode, ReplyKeyboardRemove
 
 from src.apps.clickup.logic import (
     get_user_tasks, get_user_tasks_with_unset_time, create_task,
-    get_members, get_user_folders, get_lists_by_folder, get_task_by_id
+    get_members, get_user_folders, get_lists_by_folder, get_task_by_id,
+    get_tasks
 )
 from src.apps.users.logic import get_user
 from src.bot.dispatcher import bot, dp
@@ -16,8 +17,8 @@ from src.bot.messages.clickup.tasks import (
     prepare_response_list_tasks, prepare_response_create_task_check_data,
     prepare_response_list_tasks_with_unset_time, prepare_response_task_data
 )
-from src.bot.states.clickup.tasks import CreateTaskState, GetTaskState, GetTaskListByUser
-from src.submodules.clickup.enums import Tags, Priority, Teams
+from src.bot.states.clickup.tasks import CreateTaskState, GetTaskState, GetTaskListByUser, GetTasksByList
+from src.submodules.clickup.enums import Tags, Priority, Teams, ClickUpTaskStatusType
 from src.submodules.clickup.schemas import ClickUpCreateTask
 
 
@@ -213,7 +214,7 @@ async def create_task_add_folder(message: types.Message):
     Handler по нажатию Кнопки "Создать задачу".
 
     :return: Список InlineButtons.
-    Ожидается выбор пользователя и уведомленя на callback handler.
+    Ожидается выбор пользователя и уведомление на callback handler.
     """
     user = await get_user(message.chat.id)
     if not user:
@@ -241,7 +242,7 @@ async def create_task_add_list(message: types.Message, state: FSMContext):
     Функция которая вызывается из Callback Handler, choose_folder
 
     :return: Список InlineButtons.
-    Ожидается выбор пользователя и уведомленя на callback handler.
+    Ожидается выбор пользователя и уведомление на callback handler.
     """
     user = await get_user(message.chat.id)
     if not user:
@@ -300,7 +301,7 @@ async def create_task_add_assigned(message: types.Message, state: FSMContext):
     Шаг №5 Выбор исполнителя по задаче.
 
     :return: Список InlineButtons.
-    Ожидается выбор пользователя и уведомленя на callback handler.
+    Ожидается выбор пользователя и уведомление на callback handler.
     """
     await state.update_data(desc=message.text)
 
@@ -329,7 +330,7 @@ async def create_task_add_tags(message: types.Message, state: FSMContext):
     Функция которая вызывается из Callback Handler, choose_assigned
 
     :return: Список InlineButtons.
-    Ожидается выбор пользователя и уведомленя на callback handler.
+    Ожидается выбор пользователя и уведомление на callback handler.
     """
     choice = tasks_click_up_keyboards.generate_inline_buttons_for_click_up_tags(
         tags=[(e.value, e.preview_name) for e in Tags]
@@ -344,7 +345,7 @@ async def create_task_add_priority(message: types.Message, state: FSMContext):
     Функция которая вызывается из Callback Handler, choose_tags
 
     :return: Список InlineButtons.
-    Ожидается выбор пользователя и уведомленя на callback handler.
+    Ожидается выбор пользователя и уведомление на callback handler.
     """
     state = await state.get_state()
 
@@ -366,7 +367,7 @@ async def create_task_check_data(message: types.Message, state: FSMContext):
     Функция которая вызывается из Callback Handler, choose_priority
 
     :return: Список InlineButtons.
-    Ожидается выбор пользователя и уведомленя на callback handler.
+    Ожидается выбор пользователя и уведомление на callback handler.
     """
     data = await state.get_data()
     response = prepare_response_create_task_check_data(data)
@@ -438,6 +439,13 @@ async def create_task_send_request(message: types.Message, state: FSMContext):
 
 @dp.message_handler(Text(equals=[tasks_click_up_keyboards.TaskManagerClickUpKeysEnum.task_list_by_user.value]), state=None)
 async def get_tasks_by_click_up_user_choose_assigned(message: types.Message):
+    """
+    Шаг №1 Выбор исполнителя.
+    Получение списка задач по определенному пользователю.
+
+    :return: Список InlineButtons.
+    Ожидается выбор пользователя и уведомление на callback handler.
+    """
     user = await get_user(message.chat.id)
     if not user:
         await message.reply(
@@ -485,4 +493,103 @@ async def get_tasks_by_click_up_user(message: types.Message, state: FSMContext):
         parse_mode=ParseMode.HTML,
         reply_markup=tasks_click_up_keyboards.task_manager_keyboards
     )
+    await state.finish()
+
+
+@dp.message_handler(Text(equals=[tasks_click_up_keyboards.TaskManagerClickUpKeysEnum.task_list_by_project.value]), state=None)
+async def get_task_list_by_project_choose_folder(message: types.Message):
+    """
+    Шаг №1 Выбор папки.
+    Получение списка задач по проекту.
+
+    return:
+    """
+    user = await get_user(message.chat.id)
+    if not user:
+        await message.reply(
+            f"Такой пользователь не найден.\nПожалуйста подключите занова ClickUp.",
+            reply_markup=start_keyboards.keyboards
+        )
+        return
+
+    data = await get_user_folders(user)
+    choices = tasks_click_up_keyboards.generate_inline_buttons_for_click_up_folders(data)
+    for choice in choices:
+        await bot.send_message(
+            message.chat.id,
+            f"{choice['space_name']}",
+            reply_markup=choice['keyboards']
+        )
+
+    await GetTasksByList.choose_folder.set()
+
+
+async def get_task_list_by_project_choose_list(message: types.Message, state: FSMContext):
+    """
+    Шаг №2 Выбор списка (bugs, backlogs, sprint) из откуда хотим взять задачи.
+    Функция которая вызывается из Callback Handler, get_task_list_by_project_choose_folder
+
+    :return: Список InlineButtons.
+    Ожидается выбор пользователя и уведомление на callback handler.
+    """
+    user = await get_user(message.chat.id)
+    if not user:
+        await message.reply(
+            f"Такой пользователь не найден.\nПожалуйста подключите занова ClickUp.",
+            reply_markup=start_keyboards.keyboards
+        )
+        return
+
+    data = await state.get_data()
+
+    folder_lists = await get_lists_by_folder(user, data['folder_id'])
+    choice = tasks_click_up_keyboards.generate_inline_buttons_for_click_up_lists(folder_lists)
+
+    await bot.send_message(message.chat.id, f"{folder_lists.name}", reply_markup=choice['keyboards'])
+
+    await GetTasksByList.choose_list.set()
+
+
+async def get_task_list_by_project_choose_task_status(message: types.Message, state: FSMContext):
+    """
+    Шаг №3 Выбор статуса задач (Выполненные или В работе).
+    Функция которая вызывается из Callback Handler, get_task_list_by_project_choose_list
+
+    :return: Список InlineButtons.
+    Ожидается выбор пользователя и уведомление на callback handler.
+    """
+    choice = tasks_click_up_keyboards.generate_inline_buttons_for_click_up_task_status()
+
+    await bot.send_message(message.chat.id, f"Выберите статус задач:", reply_markup=choice)
+
+    await GetTasksByList.choose_task_status.set()
+
+
+async def get_task_list_by_project(message: types.Message, state: FSMContext):
+    """
+    Шаг №4 Сбор задач.
+    Функция которая вызывается из Callback Handler, get_task_list_by_project_choose_task_status
+
+    :return: Список задач.
+    """
+    user = await get_user(message.chat.id)
+    if not user:
+        await message.reply(
+            f"Такой пользователь не найден.\nПожалуйста подключите занова ClickUp.",
+            reply_markup=start_keyboards.keyboards
+        )
+        return
+
+    data = await state.get_data()
+
+    tasks = await get_tasks(user, data['list_id'], ClickUpTaskStatusType(data['task_group']))
+    response = prepare_response_list_tasks(tasks)
+
+    await bot.send_message(
+        message.chat.id,
+        f"{response}",
+        parse_mode=ParseMode.HTML,
+        reply_markup=tasks_click_up_keyboards.task_manager_keyboards
+    )
+
     await state.finish()

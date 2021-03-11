@@ -1,6 +1,6 @@
-
 from src.submodules.common.base_class import APIClass
 from src.submodules.oauth.service import OAuth, OAuthUtils
+from .enums import ClickUpTaskStatusType
 from .schemas import ClickUpTasks, ClickUpCreateTask
 from .serializer import prepare_task
 from .settings import click_up_settings
@@ -91,13 +91,19 @@ class Tasks(APIClass):
         r_json = await self.make_request("GET", url)
         return r_json
 
+    async def get_tasks_by_list(self, list_id: int):
+        url = f"https://api.clickup.com/api/v2/list/{list_id}/task"
+
+        r_json = await self.make_request("GET", url)
+        return r_json['tasks']
+
 
 class ClickUp(Users, Teams, Spaces, Folders, Lists, Tasks):
     """
     Класс для работы с ClickUP API.
     """
 
-    async def collect_user_tasks(self, click_user_id: int) -> ClickUpTasks:
+    async def collect_user_tasks(self, click_user_id: int = None) -> ClickUpTasks:
         """
         Метод по сбору назначенных задач на пользователя по всему WorkSpace.
 
@@ -118,8 +124,30 @@ class ClickUp(Users, Teams, Spaces, Folders, Lists, Tasks):
 
         return ClickUpTasks(tasks=prepared_tasks)
 
+    async def collect_tasks(self, list_id: int, status_type: ClickUpTaskStatusType) -> ClickUpTasks:
+        """
+        Метод по сбору всех задач в списке.
+
+        :param list_id ID-списка в проекте:
+        :param status - тип статуса задачи. Могут быть 3 типа close, done, open
+        """
+        tasks = await self.get_tasks_by_list(list_id)
+
+        if status_type == ClickUpTaskStatusType.done:
+            # Если статус задачи является выполненным он переход в опрд. тип задач
+            # который ClickUp выставляет автоматический в виде галочки.
+            tasks = [prepare_task(x) for x in tasks if x['status']['type'] == status_type.value]
+
+        else:
+            # В другом случае отсортировываем все задачи у которых тип отличается от выполненного.
+            tasks = [prepare_task(x) for x in tasks if x['status']['type'] != ClickUpTaskStatusType.done.value]
+
+        return ClickUpTasks(tasks=tasks)
+
     async def start_webhook_accepting(self, team_id: int, webhook_endpoint: str):
-        """Метод для запуска получения уведомлений по разным событиям в кликап связанных с пользователем."""
+        """
+        Метод для запуска получения уведомлений по разным событиям в кликап связанных с пользователем.
+        """
         url = f"https://api.clickup.com/api/v2/team/{team_id}/webhook"
 
         # Endpoint - куда кликап будет отправлять запросы.

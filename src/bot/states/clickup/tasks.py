@@ -19,3 +19,9 @@ class GetTaskState(StatesGroup):
 
 class GetTaskListByUser(StatesGroup):
     choose_assigned = State()
+
+
+class GetTasksByList(StatesGroup):
+    choose_folder = State()
+    choose_list = State()
+    choose_task_status = State()

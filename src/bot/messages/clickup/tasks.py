@@ -10,16 +10,26 @@ def prepare_response_list_tasks(data: ClickUpTasks) -> str:
     for task in data.tasks:
         tags_to_str = tags_list_to_emoji_str(task.tags)
         priority_to_emoji = Priority(task.priority).emoji
-        response += f"{priority_to_emoji}{tags_to_str} <a href='{task.url}'>{task.id}</a> {task.name}\n"
+        add_string = f"{priority_to_emoji}{tags_to_str} <a href='{task.url}'>{task.id}</a> {task.name}\n"
 
-    return response[:4096]
+        if len(response) + len(add_string) > 4096:
+            return response
+        else:
+            response += add_string
+
+    return response
 
 
 def prepare_response_list_tasks_with_unset_time(data: ClickUpTasks) -> str:
     """Подготовка данных для ответа в телеграмм."""
     response = f"Не проставлено планируемое время в задачах:\n"
     for task in data.tasks:
-        response += f"<a href='{task.url}'>{task.id}</a> {task.name}\n"
+        add_string = f"<a href='{task.url}'>{task.id}</a> {task.name}\n"
+
+        if len(response) + len(add_string) > 4096:
+            return response
+        else:
+            response += add_string
 
     return response[:4096]
 
@@ -44,7 +54,7 @@ def prepare_response_create_task_check_data(task_data: dict) -> str:
 
     response += f"Приоритет: {Priority(task_data['priority']).preview_name}\n"
 
-    return response[:4096]
+    return response
 
 
 def prepare_response_task_data(task: ClickUpTaskItem, members: List[MemberItem]) -> str:
@@ -81,7 +91,7 @@ def prepare_response_notification_assignee(
     priority_to_emoji = Priority(task.priority).emoji
     response += f"{priority_to_emoji}{tags_to_str} <a href='{task.url}'>{task.id}</a> {task.name}\n"
 
-    return response[:4096]
+    return response
 
 
 def prepare_response_notification_comment_post(

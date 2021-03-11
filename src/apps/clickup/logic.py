@@ -13,7 +13,7 @@ from src.bot.messages.clickup.tasks import (
     prepare_response_notification_assignee, prepare_response_notification_comment_post
 )
 from src.core.enums import WebhookUrlsEnum
-from src.submodules.clickup.enums import Priority, Tags, Teams, ClickUpAssigneeTypes
+from src.submodules.clickup.enums import Priority, Tags, Teams, ClickUpAssigneeTypes, ClickUpTaskStatusType
 from src.submodules.clickup.schemas import (
     ClickUpTasks, UserGroups, ClickUpUser, TeamData, ClickUpData, FolderData, ListData, SpaceData, ClickUpCreateTask,
     MemberItem
@@ -61,7 +61,7 @@ async def add_click_up_data_by_user(user_id: int, code: str) -> None:
     await bind_data(user_id, prepare_user_data(user_data, token_data))
 
 
-async def get_user_tasks(user_data: UserData, assigned_user_id: str = None) -> Optional[ClickUpTasks]:
+async def get_user_tasks(user_data: UserData, assigned_user_id: str = None) -> ClickUpTasks:
     """
     Получение списка задач на пользователя.
 
@@ -208,6 +208,23 @@ async def get_task_by_id(user_data: UserData, task_id: str, is_need_members: boo
     return prepared_task, prepared_members
 
 
+async def get_tasks(user_data: UserData, list_id: int, status: ClickUpTaskStatusType) -> ClickUpTasks:
+    """Получение списка задач по листу."""
+    data = await ClickUp(user_data.click_up.auth_token).collect_tasks(list_id, status)
+
+    data.tasks.sort(
+        key=lambda x: (
+            Priority(x.priority).priority_value,
+            [
+                Tags(x.name).priority_value for x in x.tags
+            ]
+        ),
+        reverse=True
+    )
+
+    return data
+
+
 async def send_assignee_notification(
         assignee_user_id: int,
         task_id: str,
@@ -260,10 +277,13 @@ async def send_comment_post_notification(
         comment=comment,
         creator=creator
     )
+
     # Так как у нас не жесткой привязки к опрд пользователю
     # мы делаем рассылку на всех кто причастен к этой задаче.
     for member in members:
         assignee = await get_click_up_user(member.id)
         if not assignee:
             continue
+        if len(response) > 4096:
+            await bot.send_file('html')
         await bot.send_message(assignee.user_id, response, parse_mode=ParseMode.HTML)

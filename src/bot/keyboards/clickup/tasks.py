@@ -5,7 +5,7 @@ from aiogram.utils.callback_data import CallbackData
 
 from src.bot.keyboards.clickup.menu import MenuClickUpKeysEnum
 from src.bot.keyboards.common import CommonKeysEnum
-from src.submodules.clickup.enums import Teams
+from src.submodules.clickup.enums import Teams, ClickUpTaskStatusType
 from src.submodules.clickup.schemas import ClickUpData, FolderData, UserGroups
 
 
@@ -13,18 +13,20 @@ class TaskManagerClickUpKeysEnum(Enum):
     create_task = "Создать задачу"
     get_task = "Поиск задачи"
     task_list_by_user = "Список задач по пользователю"
+    task_list_by_project = "Список задач по проекту"
 
 
 task_manager_keyboards = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text=TaskManagerClickUpKeysEnum.create_task.value),
-        ],
-        [
-            KeyboardButton(text=TaskManagerClickUpKeysEnum.get_task.value),
+            KeyboardButton(text=TaskManagerClickUpKeysEnum.task_list_by_project.value),
         ],
         [
             KeyboardButton(text=TaskManagerClickUpKeysEnum.task_list_by_user.value),
+        ],
+        [
+            KeyboardButton(text=TaskManagerClickUpKeysEnum.create_task.value),
+            KeyboardButton(text=TaskManagerClickUpKeysEnum.get_task.value),
         ],
         [
             KeyboardButton(text=MenuClickUpKeysEnum.main.value),
@@ -162,5 +164,19 @@ def generate_inline_buttons_for_click_up_check_data() -> InlineKeyboardMarkup:
             callback_data=CallbackData("create_task", "action").new(action="Отменить")
         )
     )
+
+    return choice
+
+
+def generate_inline_buttons_for_click_up_task_status() -> InlineKeyboardMarkup:
+    choice = InlineKeyboardMarkup(row_width=3)
+
+    for x in ClickUpTaskStatusType:
+        choice.insert(
+            InlineKeyboardButton(
+                text=x.preview_name,
+                callback_data=CallbackData("task_status", "task_group").new(task_group=x.value)
+            )
+        )
 
     return choice

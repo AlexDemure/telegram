@@ -130,3 +130,19 @@ class ClickUpEvents(Enum):
 class ClickUpAssigneeTypes(Enum):
     add = "assignee_add"
     remove = "assignee_rem"
+
+
+class ClickUpTaskStatusType(Enum):
+    done = "done"
+    open = "open"
+
+    @property
+    def preview_name(self):
+        if self is self.done:
+            return "Выполненные"
+        elif self is self.open:
+            return "Открытые"
+        else:
+            return "Не известно"
+
+
