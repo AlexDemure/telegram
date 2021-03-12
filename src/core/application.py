@@ -47,11 +47,3 @@ async def application():
 
     return app
 
-
-if __name__ == '__main__':
-    import os
-    ENV = os.environ.get("ENV", "DEV")
-    if ENV == "PROD":
-        os.system("gunicorn src.core.application:application --bind 127.0.0.1:7040 --worker-class aiohttp.GunicornWebWorker")
-    else:
-        web.run_app(application(), host="127.0.0.1", port=7040)
