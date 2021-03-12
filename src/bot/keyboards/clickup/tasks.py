@@ -6,7 +6,7 @@ from aiogram.utils.callback_data import CallbackData
 from src.bot.keyboards.clickup.menu import MenuClickUpKeysEnum
 from src.bot.keyboards.common import CommonKeysEnum
 from src.submodules.clickup.enums import Teams, ClickUpTaskStatusType
-from src.submodules.clickup.schemas import ClickUpData, FolderData, UserGroups
+from src.submodules.clickup.schemas import ClickUpData, FolderData, UserGroups, SpaceData
 
 
 class TaskManagerClickUpKeysEnum(Enum):
@@ -59,25 +59,39 @@ me_menu_keyboards = ReplyKeyboardMarkup(
 )
 
 
-def generate_inline_buttons_for_click_up_folders(data: ClickUpData) -> list:
+def generate_inline_buttons_for_click_up_spaces(data: ClickUpData) -> list:
     choices = []
     for team in data.teams:
+        choice = InlineKeyboardMarkup(row_width=1)
         for space in team.spaces:
-            choice = InlineKeyboardMarkup(row_width=3)
-            for folder in space.folders:
-                choice.insert(
-                    InlineKeyboardButton(
-                        text=folder.name,
-                        callback_data=CallbackData("folders", "id", "name").new(
-                            id=folder.id,
-                            name=folder.name
-                        )
+            choice.insert(
+                InlineKeyboardButton(
+                    text=space.name,
+                    callback_data=CallbackData("spaces", "id", "name").new(
+                        id=space.id,
+                        name=space.name
                     )
                 )
-
-            choices.append(dict(space_name=space.name, keyboards=choice))
+            )
+        choices.append(dict(team_name=team.name, keyboards=choice))
 
     return choices
+
+
+def generate_inline_buttons_for_click_up_folders(data: SpaceData) -> InlineKeyboardMarkup:
+    choice = InlineKeyboardMarkup(row_width=1)
+    for folder in data.folders:
+        choice.insert(
+            InlineKeyboardButton(
+                text=folder.name,
+                callback_data=CallbackData("folders", "id", "name").new(
+                    id=folder.id,
+                    name=folder.name
+                )
+            )
+        )
+
+    return choice
 
 
 def generate_inline_buttons_for_click_up_lists(folder: FolderData) -> dict:
@@ -122,7 +136,7 @@ def generate_inline_buttons_for_click_up_members(members: UserGroups) -> list:
 
 
 def generate_inline_buttons_for_click_up_tags(tags: list) -> dict:
-    choice = InlineKeyboardMarkup(row_width=2)
+    choice = InlineKeyboardMarkup(row_width=1)
 
     for tag in tags:
         choice.insert(
@@ -136,7 +150,7 @@ def generate_inline_buttons_for_click_up_tags(tags: list) -> dict:
 
 
 def generate_inline_buttons_for_click_up_priority(priorities: list) -> dict:
-    choice = InlineKeyboardMarkup(row_width=2)
+    choice = InlineKeyboardMarkup(row_width=1)
 
     for priority in priorities:
         choice.insert(
@@ -150,7 +164,7 @@ def generate_inline_buttons_for_click_up_priority(priorities: list) -> dict:
 
 
 def generate_inline_buttons_for_click_up_check_data() -> InlineKeyboardMarkup:
-    choice = InlineKeyboardMarkup(row_width=2)
+    choice = InlineKeyboardMarkup(row_width=1)
 
     choice.insert(
         InlineKeyboardButton(

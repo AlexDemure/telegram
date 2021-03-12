@@ -2,6 +2,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
 class CreateTaskState(StatesGroup):
+    add_space = State()
     add_folder = State()
     add_list = State()
     add_name = State()
@@ -22,6 +23,7 @@ class GetTaskListByUser(StatesGroup):
 
 
 class GetTasksByList(StatesGroup):
+    choose_space = State()
     choose_folder = State()
     choose_list = State()
     choose_task_status = State()

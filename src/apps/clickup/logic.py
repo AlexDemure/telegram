@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 import httpx
 from aiogram.types import ParseMode
@@ -14,8 +14,8 @@ from src.bot.messages.clickup.tasks import (
 from src.core.enums import WebhookUrlsEnum
 from src.submodules.clickup.enums import Priority, Tags, Teams, ClickUpAssigneeTypes, ClickUpTaskStatusType
 from src.submodules.clickup.schemas import (
-    ClickUpTasks, UserGroups, ClickUpUser, TeamData, ClickUpData, FolderData, ListData, SpaceData, ClickUpCreateTask,
-    MemberItem
+    ClickUpTasks, UserGroups, ClickUpUser, ClickUpData, FolderData, ListData, SpaceData, ClickUpCreateTask,
+    MemberItem, TeamData
 )
 from src.submodules.clickup.serializer import prepare_user_data, prepare_task
 from src.submodules.clickup.service import ClickUp, ClickUpOAuth
@@ -188,43 +188,24 @@ async def get_lists_by_folder(user_data: UserData, folder_id: int) -> FolderData
     )
 
 
-async def get_user_folders(user_data: UserData) -> ClickUpData:
-    """
-    Сбор всех папочных-списков по пользователю.
-
-    Папочные-списки - области где хранятся таски ClickUp.
-    """
-    prepared_teams = []
-
+async def get_user_spaces(user_data: UserData) -> ClickUpData:
+    """Получение списка Space по пользователю."""
     clickup = ClickUp(user_data.click_up.auth_token)
 
     teams = await clickup.get_teams()
 
+    prepared_teams = []
     for team in teams:
-        prepared_spaces = []
 
+        prepared_spaces = []
         spaces = await clickup.get_spaces(team['id'])
         for space in spaces:
-            prepared_folders = []
-
-            folders = await clickup.get_folders(space['id'])
-            for folder in folders:
-                prepared_folders.append(
-                    FolderData(
-                        id=folder['id'],
-                        name=folder['name'],
-                        lists=[]
-                    )
-                )
-
-            prepared_spaces.append(
-                SpaceData(
+            prepared_spaces.append(SpaceData(
                     id=space['id'],
                     name=space['name'],
-                    folders=prepared_folders
+                    folders=[]
                 )
             )
-
         prepared_teams.append(
             TeamData(
                 id=team['id'],
@@ -234,6 +215,28 @@ async def get_user_folders(user_data: UserData) -> ClickUpData:
         )
 
     return ClickUpData(teams=prepared_teams)
+
+
+async def get_user_folders_by_space_id(user_data: UserData, space_id: int) -> List[FolderData]:
+    """
+    Сбор всех папочных-списков по пользователю.
+
+    Папочные-списки - области где хранятся таски ClickUp.
+    """
+    prepared_folders = []
+
+    folders = await ClickUp(user_data.click_up.auth_token).get_folders(space_id)
+
+    for folder in folders:
+        prepared_folders.append(
+            FolderData(
+                id=folder['id'],
+                name=folder['name'],
+                lists=[]
+            )
+        )
+
+    return prepared_folders
 
 
 async def create_task(user_data: UserData, list_id: int, task_data: ClickUpCreateTask):

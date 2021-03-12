@@ -4,14 +4,30 @@ from aiogram.types import CallbackQuery
 from src.bot.commands.clickup.tasks import (
     create_task_add_name, create_task_add_tags,
     create_task_add_priority, create_task_check_data,
-    create_task_add_list, create_task_send_request,
+    create_task_add_list, create_task_send_request, create_task_add_folder,
     get_tasks_by_click_up_user,
     get_task_list_by_project_choose_list as command_get_task_list_by_project_choose_list,
     get_task_list_by_project_choose_task_status as command_get_task_list_by_project_choose_task_status,
-    get_task_list_by_project
+    get_task_list_by_project,
+    get_task_list_by_project_choose_folder as command_get_task_list_by_project_choose_folder
 )
 from src.bot.dispatcher import dp
 from src.bot.states.clickup.tasks import CreateTaskState, GetTaskListByUser, GetTasksByList
+
+
+@dp.callback_query_handler(text_contains="spaces", state=CreateTaskState.add_space)
+async def choose_space(query: CallbackQuery, state: FSMContext):
+    """
+    Callback функция - принимает уведомления при выборе Space в Workspace.
+    Ожидаемое состояние - Создание задачи, Добавление Space
+
+    Space - список глобальных папок в окружении.
+    query = CallbackData("spaces", "id", "name")
+    """
+    space = query.data.split(':')
+    await state.update_data(space_id=space[1], space_name=space[2])
+
+    await create_task_add_folder(query.message, state)  # Переход на этап добавления Folder из выбранного Space
 
 
 @dp.callback_query_handler(text_contains="folders", state=CreateTaskState.add_folder)
@@ -123,6 +139,21 @@ async def get_task_by_user_choose_assigned(query: CallbackQuery, state: FSMConte
     await state.update_data(click_up_user_id=assigned[1], click_up_username=assigned[2])
 
     await get_tasks_by_click_up_user(query.message, state)  # Переход на этап получения списка задач.
+
+
+@dp.callback_query_handler(text_contains="spaces", state=GetTasksByList.choose_space)
+async def get_task_list_by_project_choose_space(query: CallbackQuery, state: FSMContext):
+    """
+    Callback функция - принимает уведомления при выборе Space в Workspace.
+    Ожидаемое состояние - Получение списка задач по проекту, Выбор Space
+
+    Space - список глобальных папок в окружении.
+    query = CallbackData("spaces", "id", "name")
+    """
+    space = query.data.split(':')
+    await state.update_data(space_id=space[1], space_name=space[2])
+
+    await command_get_task_list_by_project_choose_folder(query.message, state)  # Переход на этап выбор Folder из выбранного Space
 
 
 @dp.callback_query_handler(text_contains="folders", state=GetTasksByList.choose_folder)
