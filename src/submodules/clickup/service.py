@@ -98,7 +98,32 @@ class Tasks(APIClass):
         return r_json['tasks']
 
 
-class ClickUp(Users, Teams, Spaces, Folders, Lists, Tasks):
+class WebHooks(APIClass):
+
+    async def create_webhook(self, team_id: int, endpoint: str):
+        url = f"https://api.clickup.com/api/v2/team/{team_id}/webhook"
+
+        # Endpoint - куда кликап будет отправлять запросы.
+        # Events - список всех событий в clickup.
+        payload = dict(endpoint=endpoint, events=["*"])
+
+        r_json = await self.make_request("POST", url, payload)
+        return r_json
+
+    async def get_webhooks(self, team_id: int):
+        url = f"https://api.clickup.com/api/v2/team/{team_id}/webhook"
+
+        r_json = await self.make_request("GET", url)
+        return r_json['webhooks']
+
+    async def delete_webhook(self, webhook_id: str):
+        url = f"https://api.clickup.com/api/v2/webhook/{webhook_id}"
+
+        r_json = await self.make_request("DELETE", url)
+        return r_json
+
+
+class ClickUp(Users, Teams, Spaces, Folders, Lists, Tasks, WebHooks):
     """
     Класс для работы с ClickUP API.
     """
@@ -143,19 +168,6 @@ class ClickUp(Users, Teams, Spaces, Folders, Lists, Tasks):
             tasks = [prepare_task(x) for x in tasks if x['status']['type'] != ClickUpTaskStatusType.done.value]
 
         return ClickUpTasks(tasks=tasks)
-
-    async def start_webhook_accepting(self, team_id: int, webhook_endpoint: str):
-        """
-        Метод для запуска получения уведомлений по разным событиям в кликап связанных с пользователем.
-        """
-        url = f"https://api.clickup.com/api/v2/team/{team_id}/webhook"
-
-        # Endpoint - куда кликап будет отправлять запросы.
-        # Events - список всех событий в clickup.
-        payload = dict(endpoint=webhook_endpoint, events=["*"])
-
-        r_json = await self.make_request("POST", url, payload)
-        return r_json
 
 
 class ClickUpOAuth(OAuth):

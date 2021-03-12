@@ -5,8 +5,7 @@ import httpx
 from aiogram.types import ParseMode
 from pydantic import validate_arguments
 
-from src.apps.users.logic import bind_data
-from src.apps.users.logic import get_click_up_user
+from src.apps.users.logic import bind_data, get_click_up_user, get_any_click_up_user_with_access_token
 from src.apps.users.schemas import UserData
 from src.bot.dispatcher import bot
 from src.bot.messages.clickup.tasks import (
@@ -21,6 +20,68 @@ from src.submodules.clickup.schemas import (
 from src.submodules.clickup.serializer import prepare_user_data, prepare_task
 from src.submodules.clickup.service import ClickUp, ClickUpOAuth
 from src.utils import get_webhook_url
+
+
+class ClickUpWebhookController:
+    click_up: ClickUp = None
+
+    webhook: dict = None
+    access_token: str = None
+    team_id: int = None
+
+    async def init_connection(self, access_token: str = None, team_id: int = None) -> None:
+        """
+        Инициализация webhook для получения уведомлений из ClickUp.
+        """
+        if self.webhook is not None:
+            logging.debug(f'Webhook is active:{self.webhook["id"]}')
+            return
+
+        if access_token is None:
+            user_data = await get_any_click_up_user_with_access_token()
+            if not user_data:
+                logging.debug("ClickUp users in not found")
+                return
+
+            self.access_token = user_data.click_up.auth_token
+        else:
+            self.access_token = access_token
+
+        self.click_up = ClickUp(self.access_token)
+
+        if team_id is None:
+            teams = await self.click_up.get_teams()
+            if len(teams) > 0:
+                self.team_id = teams[0]['id']
+            else:
+                raise ValueError("Teams is not found")
+        else:
+            self.team_id = team_id
+
+        webhook_endpoint = get_webhook_url(
+            WebhookUrlsEnum.click_up_webhook_notifications.value,
+            short_url=False
+        )
+
+        await self.clear_webhooks()
+
+        self.webhook = await self.click_up.create_webhook(team_id=self.team_id, endpoint=webhook_endpoint)
+        logging.debug(f"Create webhook connection:{self.webhook['id']}")
+
+    async def clear_webhooks(self) -> None:
+        webhooks = await self.webhook_list()
+        for webhook in webhooks:
+            logging.debug(f"Delete webhook:{webhook['id']}")
+            await self.click_up.delete_webhook(webhook['id'])
+
+    async def webhook_list(self) -> list:
+        if self.click_up is None:
+            return []
+        else:
+            return await self.click_up.get_webhooks(team_id=self.team_id)
+
+
+webhook_contoller = ClickUpWebhookController()
 
 
 @validate_arguments
@@ -42,6 +103,9 @@ async def add_click_up_data_by_user(user_id: int, code: str) -> None:
         ]
         if len(filtered_members) > 0:
             user_role = filtered_members[0]
+
+            await webhook_contoller.init_connection(token_data['access_token'], team['id'])
+
             break
 
     if user_role is None:

@@ -6,7 +6,7 @@ from pydantic import validate_arguments
 
 from src.apps.users.crud import (
     _add_user, _get_user,  _get_click_up_owner,
-    _get_users, _get_user_by_click_up_id,
+    _get_users, _get_user_by_click_up_id, _get_any_user_with_click_up_access_token
 )
 from src.apps.users.crud import update_document
 from src.apps.users.schemas import UserData, UserCreate
@@ -77,4 +77,13 @@ async def get_click_up_user(click_up_user_id: int, get_owner_if_null: bool = Fal
             if user_data:
                 return prepare_user_data(user_data)
 
+        return None
+
+
+async def get_any_click_up_user_with_access_token() -> Optional[UserData]:
+    """Получение любого пользователя с токеном."""
+    user_data = await _get_any_user_with_click_up_access_token()
+    if user_data:
+        return prepare_user_data(user_data)
+    else:
         return None
