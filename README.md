@@ -1,8 +1,7 @@
 # Manager Telegram Bot (ClickUp, Hubstaff, Развлечения)
-
 ### Бот предназначен для автоматизации рабочих процессов разработчикам и менеджерам.
 
-[![Watch the video](https://telemetr.me/photos/9ba494205fe9a008f9e69ba373f77a3f.jpg)](https://filebin.net/wx73rqrhxrziozup/______________2021-03-12_17_07_54.mp4?t=ao3prpho)
+[![Watch the video](https://image.flaticon.com/icons/png/128/2111/2111644.png) Ссылка на видео с функционалом](https://filebin.net/wx73rqrhxrziozup/______________2021-03-12_17_07_54.mp4?t=ao3prpho)
 
 ## Интегрирование бота
 ### Создание бота в телеграмм 
@@ -95,3 +94,4 @@ DEBUG:apscheduler.scheduler:Next wakeup is due at 2021-03-12 22:00:00+03:00 (in 
 ```
 ### Подключение MongoDB локально
 Инструкция по подключению: https://github.com/AlexDemure/fastapi_mongo
+
