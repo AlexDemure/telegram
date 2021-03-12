@@ -35,7 +35,7 @@ async def on_shutdown(app):
     await webhook_contoller.clear_webhooks()
 
 
-def application():
+async def application():
 
     app = web.Application()
     app.add_routes(routes)
