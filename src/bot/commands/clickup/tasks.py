@@ -22,12 +22,14 @@ from src.submodules.clickup.enums import Tags, Priority, Teams, ClickUpTaskStatu
 from src.submodules.clickup.schemas import ClickUpCreateTask, SpaceData
 
 
-@dp.message_handler(Text(equals=[menu_click_up_keyboards.MenuClickUpKeysEnum.main.value]), state=None)
-async def start_task_menu(message: types.Message):
+@dp.message_handler(Text(equals=[menu_click_up_keyboards.MenuClickUpKeysEnum.main.value]), state="*")
+async def start_task_menu(message: types.Message, state: FSMContext):
     """
     Главное меню с ClickUp
     :return: Клавиатуру с выбором "Основных действий" (Управление задачами, Мои задачи)
     """
+    await state.reset_state()
+
     user = await get_user(message.chat.id)
     if not user:
         await message.reply(

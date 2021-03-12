@@ -1,6 +1,6 @@
 FROM python:3.8-slim
 
-RUN pip install requests aiogram gunicorn aiohttp httpx pydantic motor pymongo APScheduler tenacity
+RUN pip install requests aiogram gunicorn aiohttp httpx pydantic motor pymongo APScheduler tenacity google_trans_new
 
 COPY . .
 
