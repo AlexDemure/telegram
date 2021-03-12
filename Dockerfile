@@ -8,4 +8,3 @@ EXPOSE 7040
 
 ENV PYTHONPATH=/
 
-CMD ["python", "src/core/application.py"]

@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.5"
 
 services:
   telegram:
@@ -6,24 +6,15 @@ services:
     container_name: telegram
     restart: always
     hostname: telegram
-    network_mode: "host"
+    networks:
+      - maininfrnet
     env_file:
       - ./.env
     ports:
-      - "7040:7040"
-    volumes:
-      - ./src:/src/
+      - 7040:7040
+    entrypoint: ['gunicorn', 'src.core.application:application', '--bind', '0.0.0.0:7040', '--worker-class', 'aiohttp.GunicornWebWorker']
 
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    hostname: mongodb
-    env_file:
-      - ./.env
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb:/data/db
-
-volumes:
-  mongodb:
+networks:
+  maininfrnet:
+    external:
+      name: infr_network  
