@@ -47,7 +47,7 @@ async def get_it_joke(message: types.Message):
 @dp.message_handler(Text(equals=[MenuOtherKeysEnum.evil_insult.value]), state=None)
 async def get_evil_insult(message: types.Message):
     """
-    Handler по нажатию Кнопки "Айти фразы".
+    Handler по нажатию Кнопки "Получить оскорбление".
 
     :return: Айтишная фраза
     """
@@ -55,6 +55,25 @@ async def get_evil_insult(message: types.Message):
 
     response = f"{translator.translate(data['insult'], lang_tgt='ru')}\n\n" \
                f"<i>Original: {data['insult']}</i>"
+
+    await message.answer(
+        response,
+        parse_mode=ParseMode.HTML,
+        reply_markup=menu_keyboards
+    )
+
+
+@dp.message_handler(Text(equals=[MenuOtherKeysEnum.dade_jokes.value]), state=None)
+async def get_dade_joke(message: types.Message):
+    """
+    Handler по нажатию Кнопки "Шутейка от бати".
+
+    :return: Шутейка от бати
+    """
+    data = await api.make_request("GET", "https://icanhazdadjoke.com/")
+
+    response = f"Батя: {translator.translate(data['joke'], lang_tgt='ru')}\n\n" \
+               f"<i>Original: {data['joke']}</i>"
 
     await message.answer(
         response,
