@@ -95,3 +95,4 @@ DEBUG:apscheduler.scheduler:Next wakeup is due at 2021-03-12 22:00:00+03:00 (in 
 ### Подключение MongoDB локально
 Инструкция по подключению: https://github.com/AlexDemure/fastapi_mongo
 
+
