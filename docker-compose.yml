@@ -12,7 +12,7 @@ services:
       - ./.env
     ports:
       - 7040:7040
-    entrypoint: ['gunicorn', 'src.core.application:application', '--bind 0.0.0.0:7040', '--worker-class', 'aiohttp.GunicornWebWorker']
+    entrypoint: ['gunicorn', 'src.core.application:application', '--bind', '0.0.0.0:7040', '--worker-class', 'aiohttp.GunicornWebWorker']
 
 networks:
   maininfrnet:
