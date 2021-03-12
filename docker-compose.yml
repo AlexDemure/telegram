@@ -4,6 +4,7 @@ services:
   telegram:
     build: .
     container_name: telegram
+    restart: always
     hostname: telegram
     network_mode: "host"
     env_file:
