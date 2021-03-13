@@ -9,5 +9,5 @@ def start():
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
     scheduler.add_job(daily_send_list_tasks, 'cron', hour=9)
     scheduler.add_job(daily_send_list_tasks_with_unset_time, 'cron', hour=9)
-    scheduler.add_job(daily_send_today_time_tracked_and_activity, 'cron', hour=20, minute=30)
+    scheduler.add_job(daily_send_today_time_tracked_and_activity, 'cron', hour=20, minute=35)
     scheduler.start()

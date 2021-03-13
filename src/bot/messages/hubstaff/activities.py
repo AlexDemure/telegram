@@ -11,6 +11,13 @@ def prepare_response_activities_list(data: HubStaffActivityReports):
     for report in data.reports:
         response += f"<s>{report.organization_name}\n</s>"
         for activity in report.activities:
+
+            if activity.activity == 0:
+                activity.activity = 1
+
+            if activity.tracked == 0:
+                activity.tracked = 1
+
             activity_percentage = convert_number_to_decimal(activity.activity / activity.tracked * 100)
 
             add_string = f"{activity.task.name} - {str(timedelta(seconds=activity.tracked))} <i>({activity_percentage}%)</i>\n"
@@ -20,6 +27,12 @@ def prepare_response_activities_list(data: HubStaffActivityReports):
                 break
             else:
                 response += add_string
+
+        if report.total_activity == 0:
+            report.total_activity = 1
+
+        if report.total_tracked == 0:
+            report.total_tracked = 1
 
         total_avg_activity_percentage = convert_number_to_decimal(report.total_activity / report.total_tracked * 100)
 
@@ -58,6 +71,12 @@ def prepare_response_today_activity(data: HubStaffActivityReports):
 
     for report in data.reports:
         response += f"<s>{report.organization_name}\n</s>"
+
+        if report.total_activity == 0:
+            report.total_activity = 1
+
+        if report.total_tracked == 0:
+            report.total_tracked = 1
 
         total_avg_activity_percentage = convert_number_to_decimal(report.total_activity / report.total_tracked * 100)
 
