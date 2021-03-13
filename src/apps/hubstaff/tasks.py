@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from aiogram.types import ParseMode
@@ -16,6 +17,10 @@ async def daily_send_today_time_tracked_and_activity():
 
     users = await get_users()
     for user in users:
+        if getattr(user, 'hub_staff', None) is None:
+            logging.info(f'User have not connection to HubStaff {user.dict()}')
+            continue
+
         reports = await get_activities_by_period(user, start_date, end_date)
         time_tracked_response = prepare_response_today_time_tracked(reports)
         activity_tracked_response = prepare_response_today_activity(reports)

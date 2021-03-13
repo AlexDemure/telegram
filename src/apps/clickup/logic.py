@@ -26,6 +26,7 @@ class ClickUpWebhookController:
     click_up: ClickUp = None
 
     webhook: dict = None
+    webhook_endpoint: str = None
     access_token: str = None
     team_id: int = None
 
@@ -58,21 +59,24 @@ class ClickUpWebhookController:
         else:
             self.team_id = team_id
 
-        webhook_endpoint = get_webhook_url(
+        self.webhook_endpoint = get_webhook_url(
             WebhookUrlsEnum.click_up_webhook_notifications.value,
             short_url=False
         )
 
         await self.clear_webhooks()
 
-        self.webhook = await self.click_up.create_webhook(team_id=self.team_id, endpoint=webhook_endpoint)
+        self.webhook = await self.click_up.create_webhook(team_id=self.team_id, endpoint=self.webhook_endpoint)
         logging.debug(f"Create webhook connection:{self.webhook['id']}")
 
     async def clear_webhooks(self) -> None:
         webhooks = await self.webhook_list()
         for webhook in webhooks:
-            logging.debug(f"Delete webhook:{webhook['id']}")
-            await self.click_up.delete_webhook(webhook['id'])
+            if webhook['endpoint'] == self.webhook_endpoint:
+                logging.debug(f"Delete webhook:{webhook['id']}, {webhook['endpoint']}")
+                await self.click_up.delete_webhook(webhook['id'])
+            else:
+                logging.debug(f"Webhook is skipped:{webhook['id']}, {webhook['endpoint']}")
 
     async def webhook_list(self) -> list:
         if self.click_up is None:

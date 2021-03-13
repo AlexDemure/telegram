@@ -21,8 +21,9 @@ async def on_startup(app):
     await bot.delete_webhook()
     await bot.set_webhook(f"{settings.webhook_uri}")
 
-    logging.debug(f"Webhook lists: {await webhook_contoller.webhook_list()}")
+    logging.debug(f"Webhook start lists: {await webhook_contoller.webhook_list()}")
     await webhook_contoller.init_connection()
+    logging.debug(f"Webhook lists after connection: {await webhook_contoller.webhook_list()}")
 
 
 async def on_shutdown(app):
@@ -47,3 +48,5 @@ async def application():
 
     return app
 
+if __name__ == '__main__':
+    web.run_app(application(), host="0.0.0.0", port=7040)

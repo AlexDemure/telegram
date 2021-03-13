@@ -13,7 +13,13 @@ def prepare_response_activities_list(data: HubStaffActivityReports):
         for activity in report.activities:
             activity_percentage = convert_number_to_decimal(activity.activity / activity.tracked * 100)
 
-            response += f"{activity.task.name} - {str(timedelta(seconds=activity.tracked))} <i>({activity_percentage}%)</i>\n"
+            add_string = f"{activity.task.name} - {str(timedelta(seconds=activity.tracked))} <i>({activity_percentage}%)</i>\n"
+
+            if len(response) + len(add_string) > 3896:
+                response += f"...\n"
+                break
+            else:
+                response += add_string
 
         total_avg_activity_percentage = convert_number_to_decimal(report.total_activity / report.total_tracked * 100)
 
