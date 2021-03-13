@@ -51,7 +51,7 @@ async def refresh_token(user_data: UserData) -> None:
 @retry(
     wait=wait_fixed(5),
     stop=stop_after_attempt(2),
-    retry=retry_if_exception_type((httpx.RequestError,)),
+    retry=retry_if_exception_type((httpx.HTTPStatusError,)),
     reraise=True
 )
 async def get_activities_by_period(
