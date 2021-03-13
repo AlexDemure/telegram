@@ -66,10 +66,10 @@ def generate_inline_buttons_for_click_up_spaces(data: ClickUpData) -> list:
         for space in team.spaces:
             choice.insert(
                 InlineKeyboardButton(
-                    text=space.name,
+                    text=space.name[:199],
                     callback_data=CallbackData("spaces", "id", "name").new(
                         id=space.id,
-                        name=space.name
+                        name=space.name[:199]
                     )
                 )
             )
@@ -83,10 +83,10 @@ def generate_inline_buttons_for_click_up_folders(data: SpaceData) -> InlineKeybo
     for folder in data.folders:
         choice.insert(
             InlineKeyboardButton(
-                text=folder.name,
+                text=folder.name[:199],
                 callback_data=CallbackData("folders", "id", "name").new(
                     id=folder.id,
-                    name=folder.name
+                    name=folder.name[:199]
                 )
             )
         )
