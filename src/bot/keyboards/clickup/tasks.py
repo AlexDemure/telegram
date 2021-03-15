@@ -200,3 +200,28 @@ def generate_inline_buttons_for_click_up_task_status() -> InlineKeyboardMarkup:
         )
 
     return choice
+
+
+def generate_inline_buttons_for_click_up_task_control() -> InlineKeyboardMarkup:
+    choice = InlineKeyboardMarkup(row_width=2)
+
+    choice.insert(
+        InlineKeyboardButton(
+            text="Добавить комментарий",
+            callback_data=CallbackData("task_control", "action").new(action="add_comment")
+        )
+    )
+    choice.insert(
+        InlineKeyboardButton(
+            text="Список комментариев",
+            callback_data=CallbackData("task_control", "action").new(action="list_comment")
+        )
+    )
+    choice.insert(
+        InlineKeyboardButton(
+            text="Выход",
+            callback_data=CallbackData("task_control", "action").new(action="cancel")
+        )
+    )
+
+    return choice

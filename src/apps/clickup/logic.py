@@ -287,6 +287,20 @@ async def get_tasks(user_data: UserData, list_id: int, status: ClickUpTaskStatus
     return data
 
 
+async def get_task_comments(user_data: UserData, task_id: str) -> list:
+    """Получение списка комментарьев по задаче."""
+    return await ClickUp(user_data.click_up.auth_token).get_task_comments(task_id)
+
+
+async def add_task_comment(user_data: UserData, task_id: str, comment: str) -> list:
+    """Добавление комментария к задаче."""
+    data = dict(
+        comment_text=comment,
+        notify_all=True
+    )
+    return await ClickUp(user_data.click_up.auth_token).add_task_comment(task_id, data)
+
+
 async def send_assignee_notification(
         assignee_user_id: int,
         task_id: str,

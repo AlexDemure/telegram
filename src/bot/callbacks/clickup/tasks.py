@@ -9,10 +9,11 @@ from src.bot.commands.clickup.tasks import (
     get_task_list_by_project_choose_list as command_get_task_list_by_project_choose_list,
     get_task_list_by_project_choose_task_status as command_get_task_list_by_project_choose_task_status,
     get_task_list_by_project,
-    get_task_list_by_project_choose_folder as command_get_task_list_by_project_choose_folder
+    get_task_list_by_project_choose_folder as command_get_task_list_by_project_choose_folder,
+    get_task_choose_action as command_get_task_choose_action,
 )
 from src.bot.dispatcher import dp
-from src.bot.states.clickup.tasks import CreateTaskState, GetTaskListByUser, GetTasksByList
+from src.bot.states.clickup.tasks import CreateTaskState, GetTaskListByUser, GetTasksByList, GetTaskState
 
 
 @dp.callback_query_handler(text_contains="spaces", state=CreateTaskState.add_space)
@@ -198,3 +199,17 @@ async def get_task_list_by_project_choose_task_status(query: CallbackQuery, stat
     await state.update_data(task_group=task_group[-1])
 
     await get_task_list_by_project(query.message, state)  # Переход на сбор задач.
+
+
+@dp.callback_query_handler(text_contains="task_control", state=GetTaskState.task_control)
+async def get_task_choose_action(query: CallbackQuery, state: FSMContext):
+    """
+    Callback функция - принимает уведомления при выборе действия по опрд. задаче.
+    Ожидаемое состояние - Получение задачи по ID, Выбор дальнейшего действия по задаче.
+
+    query = CallbackData("task_control", "action")
+    """
+    action = query.data.split(':')[1]
+    await state.update_data(action=action)
+
+    await command_get_task_choose_action(query.message, state)  # Переход на этап отправки запроса на создание задачи.

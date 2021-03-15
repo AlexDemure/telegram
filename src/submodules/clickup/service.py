@@ -97,6 +97,18 @@ class Tasks(APIClass):
         r_json = await self.make_request("GET", url)
         return r_json['tasks']
 
+    async def get_task_comments(self, task_id: str):
+        url = f"https://api.clickup.com/api/v2/task/{task_id}/comment/"
+
+        r_json = await self.make_request("GET", url)
+        return r_json['comments']
+
+    async def add_task_comment(self, task_id: str, payload: dict):
+        url = f"https://api.clickup.com/api/v2/task/{task_id}/comment/"
+
+        r_json = await self.make_request("POST", url, payload)
+        return r_json
+
 
 class WebHooks(APIClass):
 

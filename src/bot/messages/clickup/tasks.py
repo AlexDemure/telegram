@@ -109,3 +109,16 @@ def prepare_response_notification_comment_post(
     response += f"<i>{comment[:1024]}</i>"
 
     return response[:4096]
+
+
+def prepare_response_task_comments(comments: list) -> str:
+    """Подготовка ответа по списку комментарьев."""
+    response = f"Список комментариев по задаче:\n"
+    for comment in comments:
+        if len(comment['comment_text']) > 512:
+            add_string = f"{comment['comment_text'][:508]}...\n"
+        else:
+            add_string = comment['comment_text']
+        response += f"- <i>{comment['user']['username']}</i>: {add_string}"
+
+    return response[:4096]
