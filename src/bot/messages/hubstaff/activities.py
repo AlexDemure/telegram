@@ -28,11 +28,11 @@ def prepare_response_activities_list(data: HubStaffActivityReports):
             else:
                 response += add_string
 
-        if report.total_activity == 0:
-            report.total_activity = 1
-
-        if report.total_tracked == 0:
-            report.total_tracked = 1
+        if report.total_activity == 0 or report.total_tracked == 0:
+            response = f"Не удалось определеить вашу активность.\n" \
+                       f"Ваша активность или отмеченное время равно 0.\n" \
+                       f"Повысте уровень активности в HubStaff\n"
+            return response[:4096]
 
         total_avg_activity_percentage = convert_number_to_decimal(report.total_activity / report.total_tracked * 100)
 
@@ -72,11 +72,11 @@ def prepare_response_today_activity(data: HubStaffActivityReports):
     for report in data.reports:
         response += f"<s>{report.organization_name}\n</s>"
 
-        if report.total_activity == 0:
-            report.total_activity = 1
-
-        if report.total_tracked == 0:
-            report.total_tracked = 1
+        if report.total_activity == 0 or report.total_tracked == 0:
+            response = f"Не удалось определеить вашу активность.\n" \
+                       f"Ваша активность или отмеченное время равно 0.\n" \
+                       f"Повысте уровень активности в HubStaff\n"
+            return response[:4096]
 
         total_avg_activity_percentage = convert_number_to_decimal(report.total_activity / report.total_tracked * 100)
 

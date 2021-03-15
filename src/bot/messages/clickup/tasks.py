@@ -2,6 +2,7 @@ from typing import List
 from src.submodules.clickup.enums import Priority, Tags, ClickUpAssigneeTypes
 from src.submodules.clickup.schemas import ClickUpTasks, ClickUpTaskItem, MemberItem
 from src.submodules.clickup.serializer import tags_list_to_emoji_str
+from src.bot.messages.enums import CommonEmoji
 
 
 def prepare_response_list_tasks(data: ClickUpTasks) -> str:
@@ -79,7 +80,7 @@ def prepare_response_notification_assignee(
         creator: str
 ) -> str:
     """Подготовка ответа для уведомления по назначению и снятии исполнителя по задаче"""
-    response = "<b>Уведомление</b>\n"
+    response = f"{CommonEmoji.notify.value}<b>Уведомление</b>\n"
     if assignee_type == ClickUpAssigneeTypes.add:
         response += f"{creator} назначил на вас задачу\n"
     elif assignee_type == ClickUpAssigneeTypes.remove:
@@ -100,7 +101,7 @@ def prepare_response_notification_comment_post(
         creator: str
 ) -> str:
     """Подготовка ответа для уведомления по добавлению комментарья к задаче."""
-    response = f"<b>Уведомление</b>\n{creator} добавил комментарий по задаче:\n"
+    response = f"{CommonEmoji.notify.value}<b>Уведомление</b>\n{creator} добавил комментарий по задаче:\n"
     tags_to_str = tags_list_to_emoji_str(task.tags)
     priority_to_emoji = Priority(task.priority).emoji
     response += f"{priority_to_emoji}{tags_to_str} <a href='{task.url}'>{task.id}</a> {task.name}\n\n"

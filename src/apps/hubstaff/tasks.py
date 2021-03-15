@@ -9,6 +9,7 @@ from src.bot.dispatcher import bot
 from src.bot.messages.hubstaff.activities import (
     prepare_response_today_time_tracked, prepare_response_today_activity
 )
+from src.bot.messages.enums import CommonEmoji
 
 
 async def daily_send_today_time_tracked_and_activity():
@@ -24,6 +25,6 @@ async def daily_send_today_time_tracked_and_activity():
         reports = await get_activities_by_period(user, start_date, end_date)
         time_tracked_response = prepare_response_today_time_tracked(reports)
         activity_tracked_response = prepare_response_today_activity(reports)
-        await bot.send_message(user.user_id, time_tracked_response, parse_mode=ParseMode.HTML)
-        await bot.send_message(user.user_id, activity_tracked_response, parse_mode=ParseMode.HTML)
+        await bot.send_message(user.user_id, f"{CommonEmoji.daily_event.value}{time_tracked_response}", parse_mode=ParseMode.HTML)
+        await bot.send_message(user.user_id, f"{CommonEmoji.daily_event.value}{activity_tracked_response}", parse_mode=ParseMode.HTML)
 

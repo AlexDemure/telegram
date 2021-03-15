@@ -2,9 +2,8 @@ import logging
 from datetime import datetime
 
 import httpx
-from tenacity import retry, wait_fixed, stop_after_attempt, retry_if_exception_type
 
-from src.apps.users.logic import bind_data
+from src.apps.users.logic import bind_data, get_user
 from src.apps.users.schemas import UserData
 from src.bot.dispatcher import bot
 from src.core.enums import WebhookUrlsEnum
@@ -48,12 +47,6 @@ async def refresh_token(user_data: UserData) -> None:
     await bind_data(user_data.user_id, prepare_user_data(hub_staff_user_data, token_data))
 
 
-@retry(
-    wait=wait_fixed(5),
-    stop=stop_after_attempt(2),
-    retry=retry_if_exception_type((httpx.HTTPStatusError,)),
-    reraise=True
-)
 async def get_activities_by_period(
         user_data: UserData,
         start_date: datetime,
@@ -70,5 +63,8 @@ async def get_activities_by_period(
             logging.debug(f"Refreshing token by user:{user_data.user_id}")
             await bot.send_message(user_data.user_id, "Упс... Вероятно ваш токен истек, попробую получить новый....")
             await refresh_token(user_data)
+
+            user_data = await get_user(user_data.user_id)
+            return await get_activities_by_period(user_data, start_date, end_date)
 
         raise exc
