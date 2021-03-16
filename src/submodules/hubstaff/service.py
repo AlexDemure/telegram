@@ -81,6 +81,9 @@ class HubStaff(Users, Organizations, Activities, Tasks):
             prepared_activities = list()
 
             for activity in activities:
+                if activity['task_id'] is None:
+                    continue
+
                 try:
                     task = prepare_task(await self.get_task(activity['task_id']))
                 except AssertionError as e:
