@@ -19,6 +19,8 @@ async def start_menu(message: types.Message, state: FSMContext):
     await add_new_user(
         UserCreate(
             user_id=message.from_user.id,
+            fullname=message.from_user.full_name,
+            username=message.from_user.mention,
             registration_at=datetime.utcnow()
         )
     )

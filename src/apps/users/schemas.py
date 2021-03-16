@@ -9,6 +9,8 @@ from src.submodules.hubstaff.schemas import HubStaffUserData
 
 class UserDataBase(BaseModel):
     user_id: int
+    fullname: str = "NOT_SET"
+    username: str
     click_up: Optional[ClickUpUserData] = None
     hub_staff: Optional[HubStaffUserData] = None
 
