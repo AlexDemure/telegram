@@ -1,3 +1,4 @@
+import logging
 
 from motor import motor_asyncio
 
@@ -20,7 +21,7 @@ class AIOMotor:
         self.connect_uri = uri
 
     def init_connection(self):
-        print(
+        logging.info(
             f"Connect to MongoDB: db:{self.db_name}, collection:{self.collection_name}, uri:{self.connect_uri}"
         )
         self.client = motor_asyncio.AsyncIOMotorClient(self.connect_uri)
