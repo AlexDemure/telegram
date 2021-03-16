@@ -19,6 +19,6 @@ from src.bot.commands.clickup import tasks
 from src.bot.commands.hubstaff import activities
 from src.bot.commands.users import oauth, services
 from src.bot.commands.other import jokes
-from src.bot.commands.tools import estimation
+from src.bot.commands.tools import estimation, managment
 from src.bot.commands import start
 from src.bot.callbacks.clickup import tasks
