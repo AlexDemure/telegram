@@ -202,8 +202,15 @@ def generate_inline_buttons_for_click_up_task_status() -> InlineKeyboardMarkup:
     return choice
 
 
-def generate_inline_buttons_for_click_up_task_control() -> InlineKeyboardMarkup:
-    choice = InlineKeyboardMarkup(row_width=2)
+def generate_inline_buttons_for_click_up_task_control(is_new_task: bool = False) -> InlineKeyboardMarkup:
+    choice = InlineKeyboardMarkup(row_width=1)
+
+    choice.insert(
+        InlineKeyboardButton(
+            text="Добавить файл",
+            callback_data=CallbackData("task_control", "action").new(action="add_file")
+        )
+    )
 
     choice.insert(
         InlineKeyboardButton(
@@ -211,12 +218,14 @@ def generate_inline_buttons_for_click_up_task_control() -> InlineKeyboardMarkup:
             callback_data=CallbackData("task_control", "action").new(action="add_comment")
         )
     )
-    choice.insert(
-        InlineKeyboardButton(
-            text="Список комментариев",
-            callback_data=CallbackData("task_control", "action").new(action="list_comment")
+    if is_new_task is False:
+        choice.insert(
+            InlineKeyboardButton(
+                text="Список комментариев",
+                callback_data=CallbackData("task_control", "action").new(action="list_comment")
+            )
         )
-    )
+
     choice.insert(
         InlineKeyboardButton(
             text="Выход",

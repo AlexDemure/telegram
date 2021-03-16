@@ -18,6 +18,7 @@ class GetTaskState(StatesGroup):
     input_task_id = State()
     task_control = State()
     add_comment = State()
+    add_file = State()
 
 
 class GetTaskListByUser(StatesGroup):

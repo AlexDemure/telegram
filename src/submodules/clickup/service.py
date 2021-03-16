@@ -1,3 +1,4 @@
+from io import BufferedReader
 from src.submodules.common.base_class import APIClass
 from src.submodules.oauth.service import OAuth, OAuthUtils
 from .enums import ClickUpTaskStatusType
@@ -107,6 +108,22 @@ class Tasks(APIClass):
         url = f"https://api.clickup.com/api/v2/task/{task_id}/comment/"
 
         r_json = await self.make_request("POST", url, payload)
+        return r_json
+
+    async def add_task_attachment(self, task_id: str, file_io: BufferedReader):
+        url = f'https://api.clickup.com/api/v2/task/{task_id}/attachment'
+        files = [
+            (
+                'attachment',
+                (
+                    file_io.name,
+                    file_io,
+                    'application/octet-stream'
+                )
+            )
+        ]
+
+        r_json = await self.make_request_send_file(url, files)
         return r_json
 
 

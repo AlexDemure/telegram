@@ -1,4 +1,5 @@
 import logging
+from io import BufferedReader
 from typing import Optional, List
 
 import httpx
@@ -299,6 +300,11 @@ async def add_task_comment(user_data: UserData, task_id: str, comment: str) -> l
         notify_all=True
     )
     return await ClickUp(user_data.click_up.auth_token).add_task_comment(task_id, data)
+
+
+async def add_task_attachment(user_data: UserData, task_id: str, file_io: BufferedReader) -> list:
+    """Добавление документа к задаче."""
+    return await ClickUp(user_data.click_up.auth_token).add_task_attachment(task_id, file_io)
 
 
 async def send_assignee_notification(

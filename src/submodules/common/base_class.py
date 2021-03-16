@@ -27,6 +27,14 @@ class APIClass:
             response = await session.send(request)
             return self._check_result(request, response)
 
+    async def make_request_send_file(self, url, files):
+        self._headers.pop("Content-Type", None)
+
+        request = httpx.Request("POST", url, headers=self._headers, files=files)
+        async with httpx.AsyncClient(headers=self._headers) as session:
+            response = await session.send(request)
+            return self._check_result(request, response)
+
     @staticmethod
     def _check_result(request: httpx.Request, response: httpx.Response):
         if response.status_code != 200:

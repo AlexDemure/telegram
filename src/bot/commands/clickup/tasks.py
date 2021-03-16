@@ -1,3 +1,4 @@
+import tempfile
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -6,7 +7,7 @@ from aiogram.types import ParseMode, ReplyKeyboardRemove
 from src.apps.clickup.logic import (
     get_user_tasks, get_user_tasks_with_unset_time, create_task,
     get_members, get_user_folders_by_space_id, get_lists_by_folder, get_task_by_id,
-    get_tasks, get_user_spaces, get_task_comments, add_task_comment
+    get_tasks, get_user_spaces, get_task_comments, add_task_comment, add_task_attachment
 )
 from src.apps.users.logic import get_user
 from src.bot.dispatcher import bot, dp
@@ -242,6 +243,15 @@ async def get_task_choose_action(message: types.Message, state: FSMContext):
         await GetTaskState.add_comment.set()
         return
 
+    elif data['action'] == "add_file":
+        await bot.send_message(
+            message.chat.id,
+            "Вставьте документ:",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        await GetTaskState.add_file.set()
+        return
+
     elif data['action'] == "cancel":
         response = "Отмена"
 
@@ -285,6 +295,47 @@ async def get_task_add_comment(message: types.Message, state: FSMContext):
     await bot.send_message(
         message.chat.id,
         "Комментарий успешно добавлен.",
+        reply_markup=tasks_click_up_keyboards.task_manager_keyboards
+    )
+
+    await state.finish()
+
+
+@dp.message_handler(
+    state=GetTaskState.add_file,
+    content_types=['photo', 'document']
+)
+async def get_task_add_file(message: types.Message, state: FSMContext):
+    """
+    Добавление файла к задаче. Прием ввода от пользователя.
+
+    :return: Текст с упешным добавление файла.
+    """
+    user = await get_user(message.chat.id)
+    if not user:
+        await message.reply(
+            f"Такой пользователь не найден.\nПожалуйста подключите занова ClickUp.",
+            reply_markup=start_keyboards.keyboards
+        )
+        return
+
+    data = await state.get_data()
+
+    if message.photo is not None and len(message.photo) > 0:
+        with tempfile.NamedTemporaryFile(suffix=f'.jpeg') as temp_file:
+            await message.photo[-1].download(temp_file.name)
+            with open(temp_file.name, "rb") as file:
+                await add_task_attachment(user, data['task_id'], file)
+
+    elif message.document is not None:
+        with tempfile.NamedTemporaryFile(suffix=f'.{message.document.file_name.split(".")[-1]}') as temp_file:
+            await message.document.download(temp_file.name)
+            with open(temp_file.name, "rb") as file:
+                await add_task_attachment(user, data['task_id'], file)
+
+    await bot.send_message(
+        message.chat.id,
+        "Документ успешно добавлен.",
         reply_markup=tasks_click_up_keyboards.task_manager_keyboards
     )
 
@@ -550,12 +601,16 @@ async def create_task_send_request(message: types.Message, state: FSMContext):
             priority=Priority(data['priority']).clickup_priority_value
         )
     )
+
+    choice = tasks_click_up_keyboards.generate_inline_buttons_for_click_up_task_control(is_new_task=True)
     await bot.send_message(
         message.chat.id,
-        f"Задача создана ID: {new_task['id']}.",
-        reply_markup=tasks_click_up_keyboards.task_manager_keyboards
+        f"Задача создана ID: {new_task['url']}.",
+        reply_markup=choice
     )
-    await state.finish()
+
+    await state.update_data(task_id=new_task['id'])
+    await GetTaskState.task_control.set()
 
 
 @dp.message_handler(Text(equals=[tasks_click_up_keyboards.TaskManagerClickUpKeysEnum.task_list_by_user.value]),
