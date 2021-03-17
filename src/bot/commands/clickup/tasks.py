@@ -333,13 +333,15 @@ async def get_task_add_file(message: types.Message, state: FSMContext):
             with open(temp_file.name, "rb") as file:
                 await add_task_attachment(user, data['task_id'], file)
 
+    choice = tasks_click_up_keyboards.generate_inline_buttons_for_click_up_add_files()
+
     await bot.send_message(
         message.chat.id,
         "Документ успешно добавлен.",
-        reply_markup=tasks_click_up_keyboards.task_manager_keyboards
+        reply_markup=choice
     )
 
-    await state.finish()
+    await GetTaskState.task_control.set()
 
 
 @dp.message_handler(Text(equals=[tasks_click_up_keyboards.TaskManagerClickUpKeysEnum.create_task.value]), state=None)

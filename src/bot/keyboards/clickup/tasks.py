@@ -234,3 +234,23 @@ def generate_inline_buttons_for_click_up_task_control(is_new_task: bool = False)
     )
 
     return choice
+
+
+def generate_inline_buttons_for_click_up_add_files() -> InlineKeyboardMarkup:
+    choice = InlineKeyboardMarkup(row_width=1)
+
+    choice.insert(
+        InlineKeyboardButton(
+            text="Добавить еще",
+            callback_data=CallbackData("task_control", "action").new(action="add_file")
+        )
+    )
+
+    choice.insert(
+        InlineKeyboardButton(
+            text="Выход",
+            callback_data=CallbackData("task_control", "action").new(action="cancel")
+        )
+    )
+
+    return choice
