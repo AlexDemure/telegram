@@ -8,6 +8,7 @@ from src.bot.keyboards.common import CommonKeysEnum
 class MenuClickUpKeysEnum(Enum):
     me_task_menu = "Мои задачи ClickUp"
     task_manager = "Управление задачами в ClickUp"
+    analytics = "Аналитика ClickUp"
     main = "В меню ClickUp"
 
 
@@ -18,6 +19,9 @@ keyboards = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text=MenuClickUpKeysEnum.task_manager.value),
+        ],
+        [
+            KeyboardButton(text=MenuClickUpKeysEnum.analytics.value),
         ],
         [
             KeyboardButton(text=CommonKeysEnum.main.value),

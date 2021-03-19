@@ -72,6 +72,11 @@ class Lists(APIClass):
         r_json = await self.make_request("GET", url)
         return r_json['lists']
 
+    async def get_list(self, list_id: int):
+        url = f"https://api.clickup.com/api/v2/list/{list_id}"
+        r_json = await self.make_request("GET", url)
+        return r_json
+
 
 class Tasks(APIClass):
 
@@ -88,6 +93,12 @@ class Tasks(APIClass):
 
     async def get_task(self, task_id: str):
         url = f"https://api.clickup.com/api/v2/task/{task_id}/"
+
+        r_json = await self.make_request("GET", url)
+        return r_json
+
+    async def get_task_history(self, task_id: str):
+        url = f"https://api.clickup.com/api/v2/task/{task_id}/time_in_status/"
 
         r_json = await self.make_request("GET", url)
         return r_json

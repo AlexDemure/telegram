@@ -1,6 +1,7 @@
 import logging
 from io import BufferedReader
 from typing import Optional, List
+from datetime import datetime
 
 import httpx
 from aiogram.types import ParseMode
@@ -369,3 +370,30 @@ async def send_comment_post_notification(
         if len(response) > 4096:
             await bot.send_file('html')
         await bot.send_message(assignee.user_id, response, parse_mode=ParseMode.HTML)
+
+
+async def get_data_for_burndown_chart(user_data: UserData, list_id: int):
+    """Построение диаграммы burndown по спринту."""
+    click_up = ClickUp(user_data.click_up.auth_token)
+
+    list = await click_up.get_list(list_id)
+
+
+    sprint_dates = dict(
+        start_date=datetime.fromtimestamp(int(list['start_date'][:-3])),
+        end_date=datetime.fromtimestamp(int(list['due_date'][:-3]))
+    )
+
+    tasks = await click_up.get_tasks_by_list(list['id'])
+
+    total_points = 0
+    for task in tasks:
+        total_points += int(task['points']) if task['points'] is not None else 1
+        task['history'] = await click_up.get_task_history(task['id'])
+
+    data = dict(
+        sprint_dates=sprint_dates,
+        total_points=total_points
+    )
+
+    return tasks
