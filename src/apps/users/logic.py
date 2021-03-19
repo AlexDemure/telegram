@@ -49,7 +49,7 @@ async def bind_data(user_id: int, data: Union[ClickUpUserData, HubStaffUserData]
     """Обновление сервисных данных пользователю."""
     user_data = await _get_user(user_id)
     if not user_data:
-        await add_new_user(UserCreate(user_id=user_id, registration_at=datetime.utcnow()))
+        await add_new_user(UserCreate(user_id=user_id, username="NOT_SET", registration_at=datetime.utcnow()))
         user_data = await _get_user(user_id)
 
     if isinstance(data, ClickUpUserData):
