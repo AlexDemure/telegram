@@ -13,6 +13,7 @@ from src.apps.users.schemas import UserData, UserCreate
 from src.apps.users.serializer import prepare_user_data
 from src.submodules.clickup.schemas import ClickUpUserData
 from src.submodules.hubstaff.schemas import HubStaffUserData
+from src.bot.utils import get_user_by_chat_id
 
 
 @validate_arguments
@@ -49,7 +50,8 @@ async def bind_data(user_id: int, data: Union[ClickUpUserData, HubStaffUserData]
     """Обновление сервисных данных пользователю."""
     user_data = await _get_user(user_id)
     if not user_data:
-        await add_new_user(UserCreate(user_id=user_id, username="NOT_SET", registration_at=datetime.utcnow()))
+        user = await get_user_by_chat_id(user_id)
+        await add_new_user(UserCreate(user_id=user_id, username=user['username'], registration_at=datetime.utcnow()))
         user_data = await _get_user(user_id)
 
     if isinstance(data, ClickUpUserData):
