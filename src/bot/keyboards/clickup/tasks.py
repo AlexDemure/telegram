@@ -120,9 +120,6 @@ def generate_inline_buttons_for_click_up_members(members: UserGroups) -> list:
     choices = []
 
     for group, values in members.dict().items():
-        if group == Teams.guest.name:
-            continue
-
         choice = InlineKeyboardMarkup(row_width=2)
 
         for member in values:
